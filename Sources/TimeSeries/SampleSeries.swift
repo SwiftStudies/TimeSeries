@@ -11,7 +11,7 @@ public enum SampleError : Error {
 }
 
 @available(macOS 13, *)
-public struct TimeSeries<T : Value> {
+public struct SampleSeries<T : Value> {
     let `default` : T
     let allowedDifference : T
     var dataPoints = [DataPoint<T>]()

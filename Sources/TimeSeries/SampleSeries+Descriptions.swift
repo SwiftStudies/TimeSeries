@@ -1,11 +1,11 @@
 //
-//  TimeSeries+Descriptions.swift
+//  SampleSeries+Descriptions.swift
 //  TimeSeries
 //
 //
 
 @available(macOS 13, *)
-extension TimeSeries : CustomStringConvertible {
+extension SampleSeries : CustomStringConvertible {
     public var description: String {
         var output = ""
         

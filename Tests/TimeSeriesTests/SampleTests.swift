@@ -4,7 +4,7 @@ import Testing
 
 
 @Test func compression() async throws {
-    var timeSeries = TimeSeries<Double>()
+    var timeSeries = SampleSeries<Double>()
 
     try timeSeries.capture(0, at: 0)
     try timeSeries.capture(1, at: 10)
@@ -34,7 +34,7 @@ import Testing
 }
 
 @Test func allowedDifferences() async throws {
-    var timeSeries = TimeSeries<Double>(allowedDifference: 0.1)
+    var timeSeries = SampleSeries<Double>(allowedDifference: 0.1)
 
     try timeSeries.capture(0, at: 0)
     try timeSeries.capture(1, at: 10)
@@ -63,7 +63,7 @@ import Testing
 }
 
 @Test func creation() async throws {
-    var timeSeries = TimeSeries<Double>()
+    var timeSeries = SampleSeries<Double>()
 
     try timeSeries.capture(5, at: 5)
     #expect(timeSeries[10] == 5)

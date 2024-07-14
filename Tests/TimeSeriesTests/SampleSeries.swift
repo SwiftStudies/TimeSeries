@@ -1,5 +1,5 @@
 //
-//  TimeSeries.swift
+//  SampleSeries.swift
 //  TimeSeries
 //
 //
@@ -7,13 +7,13 @@ import Testing
 @testable import TimeSeries
 
 @Test func defaults() async throws {
-    #expect(TimeSeries<Double>()[10] == 0)
-    #expect(TimeSeries<Double>(20)[10] == 20)
+    #expect(SampleSeries<Double>()[10] == 0)
+    #expect(SampleSeries<Double>(20)[10] == 20)
 }
 
 @Test func interpolation() async throws {
     // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-    var timeSeries = TimeSeries<Double>()
+    var timeSeries = SampleSeries<Double>()
     
     do {
         try timeSeries.capture(0, at: 0)
@@ -30,7 +30,7 @@ import Testing
 }
 
 @Test func descriptions() async throws {
-    var timeSeries = TimeSeries<Int>()
+    var timeSeries = SampleSeries<Int>()
     
     try timeSeries.capture(1, at: 0)
     #expect(timeSeries.description == "(0.0: 1)")
