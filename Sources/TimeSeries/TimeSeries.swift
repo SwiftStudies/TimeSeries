@@ -13,18 +13,20 @@ public enum SampleError : Error {
 @available(macOS 13, *)
 public struct TimeSeries<T : Value> {
     let `default` : T
+    let allowedDifference : T
     var dataPoints = [DataPoint<T>]()
-    
-    init(){
-        self.default = T.zero
-    }
-    
-    init (_ defaultValue: T) {
+        
+    init (_ defaultValue: T = T.zero, allowedDifference: T = T.zero) {
         self.default = defaultValue
+        self.allowedDifference = allowedDifference
     }
     
     var sampleTimes: [TimeInterval] {
         return dataPoints.map { $0.time }
+    }
+    
+    func approximatelyEqual(_ value: T, to otherValue: T) -> Bool {
+        return (value - otherValue).absoluteValue <= allowedDifference
     }
     
     mutating func clear() {
@@ -63,7 +65,7 @@ public struct TimeSeries<T : Value> {
         
         // If the last two values are the same, remove the last sample so this one will just extend the time without
         // interpolation
-        if dataPoints[lastIndex].value == value && dataPoints[lastButOneIndex].value == value {
+        if approximatelyEqual(dataPoints[lastIndex].value, to: value) && approximatelyEqual(dataPoints[lastButOneIndex].value, to: value) {
             dataPoints.removeLast()
             dataPoints.append(newDataPoint)
         } else {
