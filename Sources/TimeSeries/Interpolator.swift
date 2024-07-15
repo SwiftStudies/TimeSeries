@@ -59,11 +59,6 @@ public struct LinearInterpolator<T> : Interpolator {
 }
 
 public protocol NumericallyInterpolateable {
-    /// Create a new value based on the supplied `Double` value. This is used during interpolation
-    /// - Parameter value: The value to create
-    init(from value:Double)
-    
-    
     /// Creates a new instance of self with a value based on the supplied `Double`
     /// - Parameter value: The `Double` value to create an equivalent of
     /// - Returns: An instance of the type
@@ -74,10 +69,6 @@ public protocol NumericallyInterpolateable {
 }
 
 extension Int : NumericallyInterpolateable {
-    public init(from value:Double) {
-        self = Int(value)
-    }
-    
     public func from(value: Double) -> Int {
         return Int(value)
     }
@@ -88,10 +79,6 @@ extension Int : NumericallyInterpolateable {
 }
 
 extension Double : NumericallyInterpolateable {
-    public init(from value:Double) {
-        self = value
-    }
-    
     public func from(value: Double) -> Double {
         return value
     }
@@ -102,10 +89,6 @@ extension Double : NumericallyInterpolateable {
 }
 
 extension Float : NumericallyInterpolateable {
-    public init(from value:Double) {
-        self = Float(value)
-    }
-    
     public func from(value: Double) -> Float {
         return Float(value)
     }

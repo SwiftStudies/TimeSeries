@@ -30,6 +30,37 @@ import Foundation
     #expect(timeSeries[11] == 1)
 }
 
+@Test func interpolatorOverride() async throws {
+    var series = SampleSeries<Int>(interpolatedWith: StepInterpolator<Int>())
+    
+    try series.capture(0, at: 0)
+    try series.capture(10, at: 10)
+    
+    #expect(series[0] == 0)
+    #expect(series[5] == 0)
+    #expect(series[9] == 0)
+    #expect(series[10] == 10)
+}
+
+extension Character : Sampleable {
+    public static var `default`: Character {
+        return "x"
+    }
+}
+
+@Test func nonNumericDefaultInterpolator() async throws {
+    
+    var series = SampleSeries<Character>()
+    
+    try series.capture("a", at: 0)
+    try series.capture("b", at: 10)
+    
+    #expect(series[0] == "a")
+    #expect(series[5] == "a")
+    #expect(series[9] == "a")
+    #expect(series[10] == "b")
+}
+
 @Test func compressionWithBounce() async throws {
     var series = SampleSeries<Int>(tolerance: 1)
     

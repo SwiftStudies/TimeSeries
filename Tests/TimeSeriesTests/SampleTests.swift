@@ -5,6 +5,7 @@
 //
 
 import Testing
+import Foundation
 @testable import TimeSeries
 
 
@@ -95,4 +96,10 @@ import Testing
     })
     
     #expect(timeSeries[5] == 0.5)
+}
+
+@Test func dataPoints() async throws {
+    let dataPoint = DataPoint(value: 1, timeInterval: 10)
+    
+    #expect(dataPoint.date == Date(timeIntervalSinceReferenceDate: 10))
 }
