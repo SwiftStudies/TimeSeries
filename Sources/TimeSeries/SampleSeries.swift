@@ -5,17 +5,34 @@
 //
 import Foundation
 
+/// Errors that can occur when a new sample is captured in a SampleSeries
 public enum SampleError : Error {
     case sampleBeforeEndOfTimeSeries
     case sampleNotInTimeSeries
 }
 
+/// A data series of samples captured in temporal order (each new point must be captured at or after the time of the previous point).
+///
+/// The series will be efficiently captured, that is multiple samples of the same value (wihtin a specifialble tolerance) will result in only as many data ponts as
+/// absolutely necessary to capture. The sample series can be queried at any point in time and value will always be reported even if it must be interpolated. Accessing values is done with a subscript with a specifed time interval (since reference date).
+///
+/// ```swift
+///  var samples = SampleSeries<Double>()
+///
+///  samples.capture(21.4, at: Date.now.timeIntervalSinceReferenceDate)
+///
+///  print(samples[Date.now.timeIntervalueSinceReferenceDate+3600]) // It will be assumed the value will not change with no future data points, and 21.4 will be printed
+///```
 @available(macOS 13, *)
 public struct SampleSeries<T : Value> {
     let `default` : T
     let tolerance : T
     var dataPoints = [DataPoint<T>]()
-        
+    
+    /// Creates a new object
+    /// - Parameters:
+    ///   - defaultValue: The default value to use if no reference points exist, defaults to zero
+    ///   - tolerance: The tolerance that must be met before a new data point is stored in the series, defaults to zero.
     public init (_ defaultValue: T = T.zero, tolerance: T = T.zero) {
         self.default = defaultValue
         self.tolerance = tolerance
@@ -25,10 +42,18 @@ public struct SampleSeries<T : Value> {
         return dataPoints.map { $0.time }
     }
     
+    /// Removes all samples
     public mutating func clear() {
         dataPoints.removeAll()
     }
     
+    /// Adds a new sample, which must always be no sooner than the most recent sample. An error will be thrown if not.
+    ///
+    /// - Parameters:
+    ///     - value: The new sample
+    ///     - at: The time the sample was taken, defaults to the current time
+    ///
+    /// - Throws: `SampleError.sampleBeforeEndOfTimeSeries` if the sample is before the most recent sample
     public mutating func capture(_ value:T, at time: TimeInterval = Date.now.timeIntervalSinceReferenceDate) throws(SampleError) {
         let newDataPoint = DataPoint(value: value, time: time)
                 
@@ -77,6 +102,12 @@ public struct SampleSeries<T : Value> {
         return T(from: a.value.doubleValue + fraction * (b.value.doubleValue - a.value.doubleValue))
     }
     
+    /// Indexes the sampel series by a `TimeInterval` (since reference date)
+    ///
+    /// - Parameters:
+    /// - time: The `TimeInterval` to capture at
+    ///
+    /// - Returns: The value at that time interpolating or infering as necessary to ensure a value is always created
     public subscript (time: TimeInterval) -> T {
         if dataPoints.count == 0 {
             return self.default

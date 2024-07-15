@@ -4,9 +4,15 @@
 //
 //
 
+/// Values can be include in series (i.e. `SampleSeries` and `TimeSeries`). `Double`, `Float`, and `Int` already conform and you can create an extension to add your own to other types as you need to
 public protocol Value : SignedNumeric, Comparable {
+    
+    /// Create a new value based on the supplied `Double` value. This is used during interpolation
+    /// - Parameter value: The value to create
     init(from value:Double)
     
+    
+    /// This `Value` represented as the nearest possible `Double`. Used during interpolation
     var doubleValue:Double { get }
 }
 
