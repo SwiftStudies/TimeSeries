@@ -14,7 +14,7 @@ extension SampleSeries : CustomStringConvertible {
                 output += ", "
             }
             
-            output += "(\(dataPoint.time): \(dataPoint.value))"
+            output += "(\(dataPoint.timeInterval): \(dataPoint.value))"
         }
         
         return output
@@ -31,7 +31,7 @@ extension TimeSeries : CustomStringConvertible {
                 output += ", "
             }
             
-            output += "(\(dataPoint.time): \(dataPoint.value))"
+            output += "(\(dataPoint.timeInterval): \(dataPoint.value))"
         }
         
         return output

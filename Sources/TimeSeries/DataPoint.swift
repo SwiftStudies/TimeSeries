@@ -10,6 +10,13 @@ public struct DataPoint<T : Value> {
     /// The value
     let value   : T
     
-    /// Time in seconds since reference date
-    let time    : TimeInterval
+    /// Time in seconds since reference date when data point was captured
+    let timeInterval    : TimeInterval
+    
+    /// Date sample was taken
+    var date    : Date {
+        return Date(timeIntervalSinceReferenceDate: timeInterval)
+    }
+    
+    
 }

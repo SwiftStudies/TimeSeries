@@ -5,25 +5,19 @@
 //
 import Foundation
 
-fileprivate typealias TimerCallback = @Sendable (_ timer:Timer) -> Void
-
 @available(macOS 13, *)
 struct TimeSeries<T : Value> {
     public private(set) var dataPoints = [DataPoint<T>]()
     
     var sampleSeries : SampleSeries<T>
-
-    var baseDate : Date {
-        from ?? Date.now
-    }
     
-    let from : Date?
+    let start : TimeInterval
     let duration : TimeInterval
     let interval : TimeInterval
     
-    public init(from:Date? = nil, for duration:TimeInterval, interval:TimeInterval, defaultValue value:T = T.zero, tolerance: T = T.zero){
+    public init(from:Date, for duration:TimeInterval, every interval:TimeInterval, defaultValue value:T = T.zero, tolerance: T = T.zero){
         sampleSeries = SampleSeries<T>(value, tolerance: tolerance)
-        self.from = from
+        start = from.timeIntervalSinceReferenceDate
         self.duration = duration
         self.interval = interval
         
@@ -37,16 +31,16 @@ struct TimeSeries<T : Value> {
     }
     
     mutating public func update(){
-        var start : TimeInterval
+        var startAt : TimeInterval
         var end : TimeInterval
         if duration > 0 {
-            start = baseDate.timeIntervalSinceReferenceDate
+            startAt = start
             end = start + duration
         } else {
-            end = baseDate.timeIntervalSinceReferenceDate
-            start = end - duration.magnitude
+            end = start
+            startAt = end - duration.magnitude
         }
         
-        dataPoints = sampleSeries.timeSeries(from: start, to: end, with: interval)
+        dataPoints = sampleSeries.timeSeries(from: startAt, to: end, with: interval)
     }
 }

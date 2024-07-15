@@ -39,7 +39,7 @@ public struct SampleSeries<T : Value> {
     }
     
     var sampleTimes: [TimeInterval] {
-        return dataPoints.map { $0.time }
+        return dataPoints.map { $0.timeInterval }
     }
     
     /// Removes all samples
@@ -55,7 +55,7 @@ public struct SampleSeries<T : Value> {
     ///
     /// - Throws: `SampleError.sampleBeforeEndOfTimeSeries` if the sample is before the most recent sample
     public mutating func capture(_ value:T, at time: TimeInterval = Date.now.timeIntervalSinceReferenceDate) throws(SampleError) {
-        let newDataPoint = DataPoint(value: value, time: time)
+        let newDataPoint = DataPoint(value: value, timeInterval: time)
                 
         //If the series is empty just add it
         guard !dataPoints.isEmpty  else {
@@ -65,12 +65,12 @@ public struct SampleSeries<T : Value> {
 
         //Validate it's not before the end of the series
         let lastIndex = dataPoints.index(before: dataPoints.endIndex)
-        guard dataPoints[lastIndex].time <= time else {
+        guard dataPoints[lastIndex].timeInterval <= time else {
             throw SampleError.sampleBeforeEndOfTimeSeries
         }
         
         //If it's at the same time as the end of the series just over write it
-        guard dataPoints[lastIndex].time != time else {
+        guard dataPoints[lastIndex].timeInterval != time else {
             dataPoints.removeLast()
             dataPoints.append(newDataPoint)
             return
@@ -95,9 +95,9 @@ public struct SampleSeries<T : Value> {
     }
     
     func interpolatedValue(at time: TimeInterval, between a: DataPoint<T>, and b: DataPoint<T>) -> T {
-        let duration = b.time - a.time
+        let duration = b.timeInterval - a.timeInterval
         
-        let fraction = (time - a.time) / duration
+        let fraction = (time - a.timeInterval) / duration
         
         return T(from: a.value.doubleValue + fraction * (b.value.doubleValue - a.value.doubleValue))
     }
@@ -115,22 +115,22 @@ public struct SampleSeries<T : Value> {
             return dataPoints[0].value
         }
         
-        if time <= dataPoints[0].time {
+        if time <= dataPoints[0].timeInterval {
             return dataPoints[0].value
         }
         
         let lastIndex = dataPoints.index(before: dataPoints.endIndex)
-        if time >= dataPoints[lastIndex].time {
+        if time >= dataPoints[lastIndex].timeInterval {
             return dataPoints[lastIndex].value
         }
         
         var lastDataPoint : DataPoint<T>!
         
         for dataPoint in dataPoints {
-            if dataPoint.time == time {
+            if dataPoint.timeInterval == time {
                 return dataPoint.value
             }
-            if dataPoint.time > time {
+            if dataPoint.timeInterval > time {
                 return interpolatedValue(at: time, between: lastDataPoint, and: dataPoint)
             }
             lastDataPoint = dataPoint
@@ -149,7 +149,7 @@ public struct SampleSeries<T : Value> {
     public func timeSeries(from startTime: TimeInterval, to endTime: TimeInterval, with interval: TimeInterval) -> [DataPoint<T>] {
         var dataPoints = [DataPoint<T>]()
         for time in stride(from: startTime, to: endTime, by: interval){
-            dataPoints.append(DataPoint<T>(value: self[time], time: time))
+            dataPoints.append(DataPoint<T>(value: self[time], timeInterval: time))
         }
         
         return dataPoints

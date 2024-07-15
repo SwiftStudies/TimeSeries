@@ -5,7 +5,7 @@
 //
 import Foundation
 
-extension TimeInterval {
+public extension TimeInterval {
     /// The time interval as it's value as a number of seconds.
     var seconds: Self {
         return self
