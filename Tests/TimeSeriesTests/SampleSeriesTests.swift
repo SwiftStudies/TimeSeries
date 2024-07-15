@@ -1,5 +1,5 @@
 //
-//  SampleSeries.swift
+//  SampleSeriesTests.swift
 //  TimeSeries
 //
 //

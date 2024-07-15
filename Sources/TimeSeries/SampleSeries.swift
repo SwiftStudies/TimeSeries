@@ -13,27 +13,23 @@ public enum SampleError : Error {
 @available(macOS 13, *)
 public struct SampleSeries<T : Value> {
     let `default` : T
-    let allowedDifference : T
+    let tolerance : T
     var dataPoints = [DataPoint<T>]()
         
-    init (_ defaultValue: T = T.zero, allowedDifference: T = T.zero) {
+    public init (_ defaultValue: T = T.zero, tolerance: T = T.zero) {
         self.default = defaultValue
-        self.allowedDifference = allowedDifference
+        self.tolerance = tolerance
     }
     
     var sampleTimes: [TimeInterval] {
         return dataPoints.map { $0.time }
     }
     
-    func approximatelyEqual(_ value: T, to otherValue: T) -> Bool {
-        return (value - otherValue).absoluteValue <= allowedDifference
-    }
-    
-    mutating func clear() {
+    public mutating func clear() {
         dataPoints.removeAll()
     }
     
-    mutating func capture(_ value:T, at time: TimeInterval = Date.now.timeIntervalSinceReferenceDate) throws(SampleError) {
+    public mutating func capture(_ value:T, at time: TimeInterval = Date.now.timeIntervalSinceReferenceDate) throws(SampleError) {
         let newDataPoint = DataPoint(value: value, time: time)
                 
         //If the series is empty just add it
@@ -65,7 +61,7 @@ public struct SampleSeries<T : Value> {
         
         // If the last two values are the same, remove the last sample so this one will just extend the time without
         // interpolation
-        if approximatelyEqual(dataPoints[lastIndex].value, to: value) && approximatelyEqual(dataPoints[lastButOneIndex].value, to: value) {
+        if value.approximatelyEquals(dataPoints[lastIndex].value, tolerance: tolerance) && value.approximatelyEquals(dataPoints[lastButOneIndex].value, tolerance: tolerance) {
             dataPoints.removeLast()
             dataPoints.append(newDataPoint)
         } else {

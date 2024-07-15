@@ -1,3 +1,9 @@
+//
+//  SampleTests.swift
+//  TimeSeries
+//
+//
+
 import Testing
 @testable import TimeSeries
 
@@ -33,8 +39,8 @@ import Testing
     #expect(timeSeries[40] == 10)
 }
 
-@Test func allowedDifferences() async throws {
-    var timeSeries = SampleSeries<Double>(allowedDifference: 0.1)
+@Test func tolerances() async throws {
+    var timeSeries = SampleSeries<Double>(tolerance: 0.1)
 
     try timeSeries.capture(0, at: 0)
     try timeSeries.capture(1, at: 10)
