@@ -43,9 +43,7 @@ import Foundation
     try series.capture(21, at: 8.hours)
     try series.capture(20, at: 10.hours)
     
-    print(series.description)
-    
-    #expect(series.description == "(32400.0: 20), (28800.0: 21), (25200.0: 21), (21600.0: 21), (18000.0: 21), (14400.0: 20), (10800.0: 20), (7200.0: 20), (3600.0: 10), (0.0: 0)")
+    #expect(series.description == "(0.0: 0), (3600.0: 10), (7200.0: 20), (10800.0: 20), (14400.0: 20), (18000.0: 21), (21600.0: 21), (25200.0: 21), (28800.0: 21), (32400.0: 20)")
 }
 
 @Test func tolerance() async throws {

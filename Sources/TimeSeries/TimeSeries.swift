@@ -33,7 +33,7 @@ struct TimeSeries<T : Value> {
     }
     
     public var dataPoints: [DataPoint<T>] {
-        return zip(dates, values).map({DataPoint(value: $1, time:$0.timeIntervalSinceReferenceDate)})
+        return zip(dates, values).map({DataPoint(value: $1, time:$0.timeIntervalSinceReferenceDate)}).reversed()
     }
     
     var dates: [Date] {
