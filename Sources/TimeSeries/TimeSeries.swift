@@ -11,13 +11,33 @@ struct TimeSeries<T : Value> {
     
     var sampleSeries : SampleSeries<T>
     
-    let start : TimeInterval
+    public var start : Date  {
+        get {
+            return Date(timeIntervalSinceReferenceDate: timeSeriesStart)
+        }
+        
+        set {
+            timeSeriesStart = newValue.timeIntervalSinceReferenceDate
+            update()
+        }
+    }
+    
+    var timeSeriesStart : TimeInterval
     let duration : TimeInterval
     let interval : TimeInterval
     
     public init(from:Date, for duration:TimeInterval, every interval:TimeInterval, defaultValue value:T = T.zero, tolerance: T = T.zero){
         sampleSeries = SampleSeries<T>(value, tolerance: tolerance)
-        start = from.timeIntervalSinceReferenceDate
+        timeSeriesStart = from.timeIntervalSinceReferenceDate
+        self.duration = duration
+        self.interval = interval
+        
+        update()
+    }
+    
+    public init(from:Date, for duration:TimeInterval, every interval:TimeInterval, using sampleSeries:SampleSeries<T>){
+        self.sampleSeries = sampleSeries
+        timeSeriesStart = from.timeIntervalSinceReferenceDate
         self.duration = duration
         self.interval = interval
         
@@ -30,14 +50,14 @@ struct TimeSeries<T : Value> {
         update()
     }
     
-    mutating public func update(){
+    mutating func update(){
         var startAt : TimeInterval
         var end : TimeInterval
         if duration > 0 {
-            startAt = start
-            end = start + duration
+            startAt = timeSeriesStart
+            end = timeSeriesStart + duration
         } else {
-            end = start
+            end = timeSeriesStart
             startAt = end - duration.magnitude
         }
         
