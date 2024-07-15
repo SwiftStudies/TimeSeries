@@ -61,6 +61,6 @@ struct TimeSeries<T : Value> {
             startAt = end - duration.magnitude
         }
         
-        dataPoints = sampleSeries.timeSeries(from: startAt, to: end, with: interval)
+        dataPoints = sampleSeries.dataPoints(from: startAt, to: end, with: interval)
     }
 }

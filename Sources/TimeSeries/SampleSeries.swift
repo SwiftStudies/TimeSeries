@@ -139,14 +139,14 @@ public struct SampleSeries<T : Value> {
         return self.default
     }
     
-    /// Generates a set of data points between two points in time, with equal amounts of time between each
+    /// Generates an array of DataPoints between two points in time, with equal amounts of time between each
     ///
     /// - Parameters:
     ///   - startTime: The time of the first sample to take in the series
     ///   - endTime: The end time of the series
     ///   - interval: The time between each set of points in the series
     /// - Returns: An array of `DataPoint`s with a sample for each point
-    public func timeSeries(from startTime: TimeInterval, to endTime: TimeInterval, with interval: TimeInterval) -> [DataPoint<T>] {
+    public func dataPoints(from startTime: TimeInterval, to endTime: TimeInterval, with interval: TimeInterval) -> [DataPoint<T>] {
         var dataPoints = [DataPoint<T>]()
         for time in stride(from: startTime, to: endTime, by: interval){
             dataPoints.append(DataPoint<T>(value: self[time], timeInterval: time))
@@ -155,13 +155,13 @@ public struct SampleSeries<T : Value> {
         return dataPoints
     }
     
-    /// Generates a time series from a specified time, with samples taken at regular intervals for a total period
+    /// Generates an array of DataPoints  from a specified time, with samples taken at regular intervals for a total period
     /// - Parameters:
     ///   - startTime: The time of the first same
     ///   - totalTime: The total duration covered by the time series
     ///   - interval: The period between samples
     /// - Returns: An array of `DataPoint`s with a sample for each point
-    public func timeSeries(from startTime: TimeInterval, for totalTime: TimeInterval, sampleEvery interval:TimeInterval) -> [DataPoint<T>] {
-        return timeSeries(from: startTime, to: startTime+totalTime, with: interval)
+    public func dataPoints(from startTime: TimeInterval, for totalTime: TimeInterval, sampleEvery interval:TimeInterval) -> [DataPoint<T>] {
+        return dataPoints(from: startTime, to: startTime+totalTime, with: interval)
     }
 }

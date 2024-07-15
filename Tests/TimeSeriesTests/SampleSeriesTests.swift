@@ -51,13 +51,13 @@ import Foundation
         try series.capture(i, at: TimeInterval(i).hours)
     }
     
-    let betweenSeries = series.timeSeries(from: 5.hours, to: 10.hours, with: 1.hours)
+    let betweenSeries = series.dataPoints(from: 5.hours, to: 10.hours, with: 1.hours)
     #expect(betweenSeries.count == 5)
     for test in zip(betweenSeries, [5,6,7,8,9,10]){
         #expect(test.0.value == test.1)
     }
     
-    let periodSeries = series.timeSeries(from: 5.hours, for: 5.hours, sampleEvery: 1.hours)
+    let periodSeries = series.dataPoints(from: 5.hours, for: 5.hours, sampleEvery: 1.hours)
     #expect(betweenSeries.count == 5)
     for test in zip(periodSeries, [5,6,7,8,9]){
         #expect(test.0.value == test.1)
