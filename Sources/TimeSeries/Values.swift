@@ -4,6 +4,7 @@
 //
 //
 
+/// Sampleable captures the basic requirements for any type to be used in a sample or time series
 public protocol Sampleable : Equatable {
     /// The default value of an instance of this type
     static var `default` : Self { get }
