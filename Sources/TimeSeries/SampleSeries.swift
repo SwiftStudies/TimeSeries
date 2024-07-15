@@ -86,7 +86,7 @@ public struct SampleSeries<T : Value> {
         
         // If the last two values are the same, remove the last sample so this one will just extend the time without
         // interpolation
-        if value.approximatelyEquals(dataPoints[lastIndex].value, tolerance: tolerance) && value.approximatelyEquals(dataPoints[lastButOneIndex].value, tolerance: tolerance) {
+        if value.approximatelyEquals(dataPoints[lastIndex].value, tolerance: tolerance) && value.approximatelyEquals(dataPoints[lastButOneIndex].value, tolerance: tolerance) && abs(dataPoints[lastIndex].value-dataPoints[lastButOneIndex].value) <= tolerance {
             dataPoints.removeLast()
             dataPoints.append(newDataPoint)
         } else {
