@@ -1,4 +1,5 @@
 #TimeSeries
+
 TimeSeries is a simple Swift package making it very easy to work with sampled real-time data (such as IoT, weather, fitness data). Samples are captured and stored efficiently and once captured, can be solely referenced as points in time. 
 
 The package has complete documentation and very high test coverage. Contributions are very welcome. 
