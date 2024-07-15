@@ -89,6 +89,9 @@ extension TimeSeries {
     try series.capture(21, at: 8.hours)
     try series.capture(20, at: 9.hours)
 
+    print(series.sampleSeries.dataPoints.map({$0.value}))
+    print(series.dataPoints.map({$0.value}))
+    
     for test in Array(zip(series.values, [0,10,20,20,20,21,20,19,21,20])){
         #expect(test.0 == test.1)
     }

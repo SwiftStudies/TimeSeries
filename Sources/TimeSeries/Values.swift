@@ -4,51 +4,37 @@
 //
 //
 
-/// Values can be include in series (i.e. `SampleSeries` and `TimeSeries`). `Double`, `Float`, and `Int` already conform and you can create an extension to add your own to other types as you need to
-public protocol Value : SignedNumeric, Comparable {
+public protocol Sampleable : Equatable {
+    /// The default value of an instance of this type
+    static var `default` : Self { get }
     
-    /// Create a new value based on the supplied `Double` value. This is used during interpolation
-    /// - Parameter value: The value to create
-    init(from value:Double)
-    
-    
-    /// This `Value` represented as the nearest possible `Double`. Used during interpolation
-    var doubleValue:Double { get }
+    /// Are the two values in tolerance against this value?
+    func inTolerance(_ one: Self, and other: Self) -> Bool
 }
 
-extension Double : Value {
-    public init(from value:Double) {
-        self = value
-    }
+public extension Sampleable where Self : Equatable{
     
-    public var doubleValue:Double {
-        return self
+    func inTolerance(_ one: Self, and other: Self) -> Bool {
+        return one == other
     }
 }
 
-extension Float : Value {
-    public init(from value:Double) {
-        self = Float(value)
+public extension Sampleable where Self : SignedNumeric, Self : Comparable {
+    static var `default` : Self {
+        return Self.zero
     }
-    
-    public var doubleValue:Double {
-        return Double(self)
+
+    func inTolerance(_ one: Self, and other: Self) -> Bool {
+        return abs(one - other) <= self
     }
-    
 }
 
-extension Int : Value {
-    public init(from value:Double) {
-        self = Int(value)
-    }
-    
-    public var doubleValue:Double {
-        return Double(self)
-    }    
+extension Int : Sampleable {
 }
 
-extension Value {
-    func approximatelyEquals(_ other: Self, tolerance: Self) -> Bool {
-        return abs(self - other) <= tolerance
-    }
+extension Double : Sampleable {
 }
+
+extension Float : Sampleable {
+}
+

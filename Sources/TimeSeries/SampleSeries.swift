@@ -24,20 +24,39 @@ public enum SampleError : Error {
 ///  print(samples[Date.now.timeIntervalueSinceReferenceDate+3600]) // It will be assumed the value will not change with no future data points, and 21.4 will be printed
 ///```
 @available(macOS 13, *)
-public struct SampleSeries<T : Value> {
+public struct SampleSeries<T:Sampleable> {
+
     let `default` : T
-    let tolerance : T
+    let tolerance : T?
+    let interpolator : any Interpolator<T>
+    
     var dataPoints = [DataPoint<T>]()
     
     /// Creates a new object
     /// - Parameters:
     ///   - defaultValue: The default value to use if no reference points exist, defaults to zero
     ///   - tolerance: The tolerance that must be met before a new data point is stored in the series, defaults to zero.
-    public init (_ defaultValue: T = T.zero, tolerance: T = T.zero) {
+    public init(_ defaultValue: T = T.default, tolerance: T? = nil, interpolatedWith interpolator: any Interpolator<T>){
         self.default = defaultValue
         self.tolerance = tolerance
+        self.interpolator = interpolator
     }
-    
+
+    /// Creates a new object
+    /// - Parameters:
+    ///   - defaultValue: The default value to use if no reference points exist, defaults to zero
+    ///   - tolerance: The tolerance that must be met before a new data point is stored in the series, defaults to zero.
+    public init(_ defaultValue: T = T.default, tolerance: T? = nil)  {
+        self.default = defaultValue
+        self.tolerance = tolerance
+        
+        if defaultValue is NumericallyInterpolateable{
+            self.interpolator = LinearInterpolator<T>()
+        } else {
+            self.interpolator = StepInterpolator<T>()
+        }
+    }
+
     var sampleTimes: [TimeInterval] {
         return dataPoints.map { $0.timeInterval }
     }
@@ -84,13 +103,23 @@ public struct SampleSeries<T : Value> {
         
         let lastButOneIndex = dataPoints.index(before: lastIndex)
         
-        // If the last two values are the same, remove the last sample so this one will just extend the time without
-        // interpolation
-        if value.approximatelyEquals(dataPoints[lastIndex].value, tolerance: tolerance) && value.approximatelyEquals(dataPoints[lastButOneIndex].value, tolerance: tolerance) && abs(dataPoints[lastIndex].value-dataPoints[lastButOneIndex].value) <= tolerance {
-            dataPoints.removeLast()
-            dataPoints.append(newDataPoint)
+        let lastValue = dataPoints[lastIndex].value
+        let lastButOneValue = dataPoints[lastButOneIndex].value
+        
+        if let tolerance {
+            if tolerance.inTolerance(value, and: lastValue) && tolerance.inTolerance(value, and: lastButOneValue) && tolerance.inTolerance(lastValue, and: lastButOneValue){
+                dataPoints.removeLast()
+                dataPoints.append(newDataPoint)
+            } else {
+                dataPoints.append(newDataPoint)
+            }
         } else {
-            dataPoints.append(newDataPoint)
+            if lastValue == value {
+                dataPoints.removeLast()
+                dataPoints.append(newDataPoint)
+            } else {
+                dataPoints.append(newDataPoint)
+            }
         }
     }
     
@@ -99,7 +128,7 @@ public struct SampleSeries<T : Value> {
         
         let fraction = (time - a.timeInterval) / duration
         
-        return T(from: a.value.doubleValue + fraction * (b.value.doubleValue - a.value.doubleValue))
+        return interpolator.interpolate(at: fraction, between: a.value, and: b.value)
     }
     
     /// Indexes the sampel series by a `TimeInterval` (since reference date)

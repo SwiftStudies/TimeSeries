@@ -7,7 +7,7 @@ import Foundation
 
 /// The type provides a window with fixed interval samples from the provided samples or SampleSeries.
 @available(macOS 13, *)
-public struct TimeSeries<T : Value> {
+public struct TimeSeries<T:Sampleable> {
     /// Datapoints, which will be automatically updated when new samples are captured or the start date is changed
     public private(set) var dataPoints = [DataPoint<T>]()
     
@@ -37,7 +37,7 @@ public struct TimeSeries<T : Value> {
     ///   - interval: The period between data points in the series
     ///   - defaultValue: The default value to use if no reference points exist, defaults to zero
     ///   - tolerance: The tolerance that must be met before a new data point is stored in the series, defaults to zero.
-    public init(from:Date, for duration:TimeInterval, every interval:TimeInterval, defaultValue value:T = T.zero, tolerance: T = T.zero){
+    public init(from:Date, for duration:TimeInterval, every interval:TimeInterval, defaultValue value:T = T.default, tolerance: T = T.default){
         sampleSeries = SampleSeries<T>(value, tolerance: tolerance)
         timeSeriesStart = from.timeIntervalSinceReferenceDate
         self.duration = duration
