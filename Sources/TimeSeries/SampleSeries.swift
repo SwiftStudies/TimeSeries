@@ -164,4 +164,14 @@ public struct SampleSeries<T : Value> {
     public func dataPoints(from startTime: TimeInterval, for totalTime: TimeInterval, sampleEvery interval:TimeInterval) -> [DataPoint<T>] {
         return dataPoints(from: startTime, to: startTime+totalTime, with: interval)
     }
+    
+    /// Creates a `TimeSeries` directly from the SampleSeries
+    /// - Parameters:
+    ///   - from: The start point of the generated TimeSeries
+    ///   - duration: The `TimeInterval` the time series should cover. If negative the `from` date will be used a to date
+    ///   - interval: The period between data points in the series
+    /// - Returns: The `TimeSeries` object. Note, no further updates will be made if new samples are captured in the original `SampleSeries` as it is a value type
+    public func timeSeries(from:Date, for duration:TimeInterval, every interval:TimeInterval)->TimeSeries<T>{
+        return TimeSeries(from: from, for: duration, every: interval)
+    }
 }

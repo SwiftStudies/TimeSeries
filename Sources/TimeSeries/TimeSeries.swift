@@ -6,7 +6,7 @@
 import Foundation
 
 @available(macOS 13, *)
-struct TimeSeries<T : Value> {
+public struct TimeSeries<T : Value> {
     public private(set) var dataPoints = [DataPoint<T>]()
     
     var sampleSeries : SampleSeries<T>
