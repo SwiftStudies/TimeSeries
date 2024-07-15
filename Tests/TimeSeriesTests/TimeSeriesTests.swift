@@ -8,12 +8,20 @@ import Foundation
 
 @testable import TimeSeries
 
+extension TimeSeries {
+    var values : [T] {
+        return dataPoints.map({$0.value})
+    }
+}
+
 @Test func timeSeries() async throws {
-    var series = TimeSeries<Int>(relativeTo: Date(timeIntervalSinceReferenceDate: 9.hours), dataPointEvery: 1.hours, capturing: 10, defaultValue: 0, tolerance: 0)
-    
+    var series = TimeSeries<Int>(from: Date(timeIntervalSinceReferenceDate: 10.hours), for: -10.hours, interval: 1.hours, defaultValue: 0, tolerance: 0)
+
     for value in series.values {
         #expect(value == 0)
     }
+    
+    #expect(series.dataPoints.count == 10)
     
     try series.capture(0, at: 0.hours)
     try series.capture(10, at: 1.hours)
@@ -23,13 +31,13 @@ import Foundation
     try series.capture(21, at: 8.hours)
     try series.capture(20, at: 10.hours)
 
-    for test in Array(zip(series.values, [0,10,20,20,20,21,21,21,21,20].reversed())){
+    for test in Array(zip(series.values, [0,10,20,20,20,21,21,21,21,20])){
         #expect(test.0 == test.1)
     }
 }
 
 @Test func description() async throws {
-    var series = TimeSeries<Int>(relativeTo: Date(timeIntervalSinceReferenceDate: 9.hours), dataPointEvery: 1.hours, capturing: 10, defaultValue: 0, tolerance: 0)
+    var series = TimeSeries<Int>(from: Date(timeIntervalSinceReferenceDate: 10.hours), for: -10.hours, interval: 1.hours, defaultValue: 0, tolerance: 0)
     
     for value in series.values {
         #expect(value == 0)
@@ -47,8 +55,8 @@ import Foundation
 }
 
 @Test func tolerance() async throws {
-    var series = TimeSeries<Int>(relativeTo: Date(timeIntervalSinceReferenceDate: 9.hours), dataPointEvery: 1.hours, capturing: 10, defaultValue: 0, tolerance: 1)
-    
+    var series = TimeSeries<Int>(from: Date(timeIntervalSinceReferenceDate: 10.hours), for: -10.hours, interval: 1.hours, defaultValue: 0, tolerance: 1)
+
     for value in series.values {
         #expect(value == 0)
     }
@@ -59,9 +67,12 @@ import Foundation
     try series.capture(21, at: 5.hours)
     try series.capture(19, at: 7.hours)
     try series.capture(21, at: 8.hours)
-    try series.capture(20, at: 10.hours)
+    try series.capture(20, at: 9.hours)
 
-    for test in Array(zip(series.values, [0,10,20,20,20,20,20,20,20,20].reversed())){
+    print(series.sampleSeries.description)
+    print(series.values)
+    
+    for test in Array(zip(series.values, [0,10,20,20,20,21,20,19,21,20])){
         #expect(test.0 == test.1)
     }
 }

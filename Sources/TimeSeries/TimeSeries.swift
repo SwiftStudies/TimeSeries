@@ -5,41 +5,31 @@
 //
 import Foundation
 
+fileprivate typealias TimerCallback = @Sendable (_ timer:Timer) -> Void
+
 @available(macOS 13, *)
 struct TimeSeries<T : Value> {
-    var values: [T]
+    public private(set) var dataPoints = [DataPoint<T>]()
+    
     var sampleSeries : SampleSeries<T>
+
     var baseDate : Date {
         from ?? Date.now
     }
     
     let from : Date?
-    let timeIntervals : [TimeInterval]
+    let duration : TimeInterval
+    let interval : TimeInterval
     
-    public init(relativeTo from:Date? = nil, dataPointEvery seconds:TimeInterval, capturing count:Int, defaultValue value:T = T.zero, tolerance: T = T.zero){
-        values = [T]()
+    public init(from:Date? = nil, for duration:TimeInterval, interval:TimeInterval, defaultValue value:T = T.zero, tolerance: T = T.zero){
         sampleSeries = SampleSeries<T>(value, tolerance: tolerance)
-    
-    
-        var timeIntervals = [TimeInterval]()
-        
-        for delta in stride(from: 0, to: seconds*count.doubleValue, by: seconds){
-            values.append(value)
-            timeIntervals.append(-delta)
-        }
-        
-        self.timeIntervals = timeIntervals
         self.from = from
+        self.duration = duration
+        self.interval = interval
+        
+        update()
     }
-    
-    public var dataPoints: [DataPoint<T>] {
-        return zip(dates, values).map({DataPoint(value: $1, time:$0.timeIntervalSinceReferenceDate)}).reversed()
-    }
-    
-    var dates: [Date] {
-        return timeIntervals.map({baseDate.addingTimeInterval($0)})
-    }
-    
+        
     mutating public func capture(_ value:T, at time: TimeInterval = Date.now.timeIntervalSinceReferenceDate) throws(SampleError) {
         try sampleSeries.capture(value, at: time)
         
@@ -47,15 +37,16 @@ struct TimeSeries<T : Value> {
     }
     
     mutating public func update(){
-        var valueIndex = values.startIndex
-        for delta in timeIntervals{
-            let newValue = sampleSeries[baseDate.timeIntervalSinceReferenceDate + delta]
-            
-            if !newValue.approximatelyEquals(values[valueIndex], tolerance: sampleSeries.tolerance) {
-                values[valueIndex] = newValue
-            }
-            
-            valueIndex = valueIndex.advanced(by: 1)
+        var start : TimeInterval
+        var end : TimeInterval
+        if duration > 0 {
+            start = baseDate.timeIntervalSinceReferenceDate
+            end = start + duration
+        } else {
+            end = baseDate.timeIntervalSinceReferenceDate
+            start = end - duration.magnitude
         }
+        
+        dataPoints = sampleSeries.timeSeries(from: start, to: end, with: interval)
     }
 }

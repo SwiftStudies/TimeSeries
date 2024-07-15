@@ -30,6 +30,20 @@ import Foundation
     #expect(timeSeries[11] == 1)
 }
 
+@Test func compressionWithBounce() async throws {
+    var series = SampleSeries<Int>(tolerance: 1)
+    
+    try series.capture(0, at: 0.hours)
+    try series.capture(10, at: 1.hours)
+    try series.capture(20, at: 2.hours)
+    try series.capture(21, at: 5.hours)
+    try series.capture(19, at: 7.hours)
+    try series.capture(21, at: 8.hours)
+    try series.capture(20, at: 9.hours)
+    
+    #expect(series.dataPoints.count == 7)
+}
+
 @Test func samplesToTimeSeries() async throws {
     var series = SampleSeries<Int>()
     
