@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "TimeSeries",
-    platforms: [.macOS(.v10_13), .iOS(.v13), .tvOS(.v13), .watchOS(.v6), .macCatalyst(.v13)],
+    platforms: [.macOS(.v12), .iOS(.v15), .tvOS(.v15), .watchOS(.v10), .macCatalyst(.v15)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(

@@ -23,7 +23,7 @@ public enum SampleError : Error {
 ///
 ///  print(samples[Date.now.timeIntervalueSinceReferenceDate+3600]) // It will be assumed the value will not change with no future data points, and 21.4 will be printed
 ///```
-@available(macOS 13, *)
+
 public struct SampleSeries<T:Sampleable> {
 
     let `default` : T

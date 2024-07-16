@@ -4,7 +4,6 @@
 //
 //
 
-@available(macOS 13, *)
 extension SampleSeries : CustomStringConvertible {
     public var description: String {
         var output = ""
@@ -21,7 +20,7 @@ extension SampleSeries : CustomStringConvertible {
     }
 }
 
-@available(macOS 13, *)
+
 extension TimeSeries : CustomStringConvertible {
     public var description: String {
         var output = ""

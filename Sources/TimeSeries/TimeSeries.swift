@@ -6,7 +6,6 @@
 import Foundation
 
 /// The type provides a window with fixed interval samples from the provided samples or SampleSeries.
-@available(macOS 13, *)
 public struct TimeSeries<T:Sampleable> {
     /// Datapoints, which will be automatically updated when new samples are captured or the start date is changed
     public private(set) var dataPoints = [DataPoint<T>]()
