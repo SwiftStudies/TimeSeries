@@ -20,6 +20,8 @@ import Testing
 }
 
 @Test func timeExtentionTests() async throws {
+    #expect(1.nanoseconds == 0.000_000_001)
+    #expect(1.milliseconds == 0.001)
     #expect(1.seconds == 1)
     #expect(4.seconds == 4)
     #expect(1.minutes == 60)
