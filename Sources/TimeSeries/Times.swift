@@ -6,7 +6,19 @@
 import Foundation
 
 public extension TimeInterval {
-    /// The time interval as it's value as a number of seconds.
+    
+    /// The interval as it's value as a number of nanoseconds
+    var nanoseconds : Self {
+        return self / 1_000_000_000
+    }
+
+    /// The interval as it's value as a number of milliseconds
+    var milliseconds : Self {
+        return self / 1000
+    }
+
+    
+    /// The time interval as it's value as a number of seconds
     var seconds: Self {
         return self
     }
