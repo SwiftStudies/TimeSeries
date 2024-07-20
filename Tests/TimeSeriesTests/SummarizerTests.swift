@@ -33,3 +33,15 @@ import Foundation
     #expect(timeSeries.dataPoints[5].value == 6)
     #expect(timeSeries.dataPoints[9].value == 10)
 }
+
+@Test func sampleInMiddle() async throws {
+    var timeSeries = TimeSeries<Double,Double>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: ValueInMiddle<Double>())
+
+    for time:TimeInterval in stride(from: 0, through: 10, by: 1){
+        try timeSeries.capture(time, at: time)
+    }
+
+    #expect(timeSeries.dataPoints[0].value == 0.5)
+    #expect(timeSeries.dataPoints[5].value == 5.5)
+    #expect(timeSeries.dataPoints[9].value == 9.5)
+}
