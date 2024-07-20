@@ -64,7 +64,7 @@ import Foundation
     #expect(timeSeries.dataPoints[2].value == 0)
 }
 
-@Test func minMax() async throws {
+@Test func minMaxSum() async throws {
     var timeSeries = TimeSeries<Int,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: MaximumValue<Int>())
 
     try timeSeries.capture(0, at: 0)
@@ -86,4 +86,11 @@ import Foundation
     #expect(timeSeries.dataPoints[0].value == 0)
     #expect(timeSeries.dataPoints[5].value == 5)
     #expect(timeSeries.dataPoints[9].value == 9)
+    
+    timeSeries.summarizer = SumSamples<Int>()
+    
+    #expect(timeSeries.dataPoints[0].value == 6)
+    #expect(timeSeries.dataPoints[5].value == 0)
+    #expect(timeSeries.dataPoints[4].value == 4)
+
 }
