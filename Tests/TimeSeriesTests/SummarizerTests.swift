@@ -9,7 +9,7 @@ import Foundation
 @testable import TimeSeries
 
 @Test func sampleAtStart() async throws {
-    var timeSeries = TimeSeries<Int,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: ValueAtStart<Int>())
+    var timeSeries = TimeSeries<Int,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: MeasureValue<Int>())
 
     for time:TimeInterval in stride(from: 0, through: 10, by: 1){
         try timeSeries.capture(Int(time), at: time)
@@ -22,7 +22,7 @@ import Foundation
 }
 
 @Test func sampleAtEnd() async throws {
-    var timeSeries = TimeSeries<Int,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: ValueAtEnd<Int>())
+    var timeSeries = TimeSeries<Int,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: MeasureValue<Int>(at:.end))
 
     for time:TimeInterval in stride(from: 0, through: 10, by: 1){
         try timeSeries.capture(Int(time), at: time)
@@ -35,7 +35,7 @@ import Foundation
 }
 
 @Test func sampleInMiddle() async throws {
-    var timeSeries = TimeSeries<Double,Double>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: ValueInMiddle<Double>())
+    var timeSeries = TimeSeries<Double,Double>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: MeasureValue<Double>(at:.middle))
 
     for time:TimeInterval in stride(from: 0, through: 10, by: 1){
         try timeSeries.capture(time, at: time)

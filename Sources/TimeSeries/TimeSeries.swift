@@ -19,7 +19,7 @@ public extension TimeSeries where SampleType == DataPointType {
         timeSeriesStart = from.timeIntervalSinceReferenceDate
         self.duration = duration
         self.interval = interval
-        self.summarizer = ValueAtStart<SampleType>()
+        self.summarizer = MeasureValue<SampleType>()
         update()
     }
     
@@ -34,7 +34,7 @@ public extension TimeSeries where SampleType == DataPointType {
         timeSeriesStart = from.timeIntervalSinceReferenceDate
         self.duration = duration
         self.interval = interval
-        self.summarizer = ValueAtStart<SampleType>()
+        self.summarizer = MeasureValue<SampleType>()
 
         update()
     }
