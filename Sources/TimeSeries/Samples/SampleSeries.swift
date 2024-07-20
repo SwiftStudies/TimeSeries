@@ -154,7 +154,7 @@ public struct SampleSeries<T:Sampleable> {
     /// - time: The  range of times to capture samples between
     ///
     /// - Returns: An `Array` of `DataPoint`s containing samples in chronological order
-    public subscript(_ range:ClosedRange<TimeInterval>)->[DataPoint<T>]{
+    public subscript(valuesFor range:ClosedRange<TimeInterval>)->[DataPoint<T>]{
         var samples = [DataPoint<T>]()
     
         if let sampleAtStart = dataPoint(atExactly: range.lowerBound) {
@@ -173,6 +173,24 @@ public struct SampleSeries<T:Sampleable> {
             samples.append(sampleAtEnd)
         } else {
             samples.append(DataPoint<T>(value: self[range.upperBound], timeInterval: range.upperBound))
+        }
+        
+        return samples
+    }
+    
+    /// Provides samples for the supplied time range. If none were taken in this range it will be empty
+    ///
+    /// - Parameters:
+    /// - time: The  range of times to capture samples between
+    ///
+    /// - Returns: An `Array` of `DataPoint`s containing samples in chronological order
+    public subscript(samplesIn range:ClosedRange<TimeInterval>)->[DataPoint<T>]{
+        var samples = [DataPoint<T>]()
+            
+        for dataPoint in dataPoints {
+            if dataPoint.timeInterval >= range.lowerBound && dataPoint.timeInterval < range.upperBound {
+                samples.append(dataPoint)
+            }
         }
         
         return samples
