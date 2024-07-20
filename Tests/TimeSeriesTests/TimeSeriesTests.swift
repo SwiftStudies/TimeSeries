@@ -9,13 +9,13 @@ import Foundation
 @testable import TimeSeries
 
 extension TimeSeries {
-    var values : [T] {
+    var values : [DataPointType] {
         return dataPoints.map({$0.value})
     }
 }
 
 @Test func timeSeries() async throws {
-    var series = TimeSeries<Int>(from: Date(timeIntervalSinceReferenceDate: 10.hours), for: -10.hours, every: 1.hours, defaultValue: 0, tolerance: 0)
+    var series = TimeSeries<Int,Int>(from: Date(timeIntervalSinceReferenceDate: 10.hours), for: -10.hours, every: 1.hours, defaultValue: 0, tolerance: 0)
 
     for value in series.values {
         #expect(value == 0)
@@ -37,7 +37,7 @@ extension TimeSeries {
 }
 
 @Test func description() async throws {
-    var series = TimeSeries<Int>(from: Date(timeIntervalSinceReferenceDate: 10.hours), for: -10.hours, every: 1.hours, defaultValue: 0, tolerance: 0)
+    var series = TimeSeries<Int,Int>(from: Date(timeIntervalSinceReferenceDate: 10.hours), for: -10.hours, every: 1.hours, defaultValue: 0, tolerance: 0)
     
     for value in series.values {
         #expect(value == 0)
@@ -55,7 +55,7 @@ extension TimeSeries {
 }
 
 @Test func forward() async throws {
-    var series = TimeSeries<Int>(from: Date(timeIntervalSinceReferenceDate: 0.hours), for: 10.hours, every: 1.hours)
+    var series = TimeSeries<Int,Int>(from: Date(timeIntervalSinceReferenceDate: 0.hours), for: 10.hours, every: 1.hours)
 
     for value in series.values {
         #expect(value == 0)
@@ -75,7 +75,7 @@ extension TimeSeries {
 }
 
 @Test func tolerance() async throws {
-    var series = TimeSeries<Int>(from: Date(timeIntervalSinceReferenceDate: 10.hours), for: -10.hours, every: 1.hours, defaultValue: 0, tolerance: 1)
+    var series = TimeSeries<Int,Int>(from: Date(timeIntervalSinceReferenceDate: 10.hours), for: -10.hours, every: 1.hours, defaultValue: 0, tolerance: 1)
 
     for value in series.values {
         #expect(value == 0)

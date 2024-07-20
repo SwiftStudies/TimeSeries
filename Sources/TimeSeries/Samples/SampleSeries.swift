@@ -131,7 +131,72 @@ public struct SampleSeries<T:Sampleable> {
         return interpolator.interpolate(at: fraction, between: a.value, and: b.value)
     }
     
-    /// Indexes the sampel series by a `TimeInterval` (since reference date)
+    /// Returns sample at a precise time, or nil if there is none
+    ///
+    /// - Parameter time: The time being searched for
+    /// - Returns: The `DataPoint` or `nil` if none is found
+    private func dataPoint(atExactly time:TimeInterval)->DataPoint<T>?{
+        for dataPoint in dataPoints {
+            if dataPoint.timeInterval == time {
+                return dataPoint
+            } else if dataPoint.timeInterval > time {
+                return nil
+            }
+        }
+        
+        return nil
+    }
+    
+    /// Provides samples for the supplied time range. It will always include (interpolating if necessary) one at exactly the start and end of the supplied
+    /// `ClosedRange`. If any samples are in between those times they will be included too
+    ///
+    /// - Parameters:
+    /// - time: The  range of times to capture samples between
+    ///
+    /// - Returns: An `Array` of `DataPoint`s containing samples in chronological order
+    public subscript(valuesFor range:ClosedRange<TimeInterval>)->[DataPoint<T>]{
+        var samples = [DataPoint<T>]()
+    
+        if let sampleAtStart = dataPoint(atExactly: range.lowerBound) {
+            samples.append(sampleAtStart)
+        } else {
+            samples.append(DataPoint<T>(value: self[range.lowerBound], timeInterval: range.lowerBound))
+        }
+        
+        for dataPoint in dataPoints {
+            if dataPoint.timeInterval > range.lowerBound && dataPoint.timeInterval < range.upperBound {
+                samples.append(dataPoint)
+            }
+        }
+        
+        if let sampleAtEnd = dataPoint(atExactly: range.upperBound) {
+            samples.append(sampleAtEnd)
+        } else {
+            samples.append(DataPoint<T>(value: self[range.upperBound], timeInterval: range.upperBound))
+        }
+        
+        return samples
+    }
+    
+    /// Provides samples for the supplied time range. If none were taken in this range it will be empty
+    ///
+    /// - Parameters:
+    /// - time: The  range of times to capture samples between
+    ///
+    /// - Returns: An `Array` of `DataPoint`s containing samples in chronological order
+    public subscript(samplesIn range:ClosedRange<TimeInterval>)->[DataPoint<T>]{
+        var samples = [DataPoint<T>]()
+            
+        for dataPoint in dataPoints {
+            if dataPoint.timeInterval >= range.lowerBound && dataPoint.timeInterval < range.upperBound {
+                samples.append(dataPoint)
+            }
+        }
+        
+        return samples
+    }
+    
+    /// Indexes the sample series by a `TimeInterval` (since reference date)
     ///
     /// - Parameters:
     /// - time: The `TimeInterval` to capture at
@@ -168,39 +233,4 @@ public struct SampleSeries<T:Sampleable> {
         return self.default
     }
     
-    /// Generates an array of DataPoints between two points in time, with equal amounts of time between each
-    ///
-    /// - Parameters:
-    ///   - startTime: The time of the first sample to take in the series
-    ///   - endTime: The end time of the series
-    ///   - interval: The time between each set of points in the series
-    /// - Returns: An array of `DataPoint`s with a sample for each point
-    public func dataPoints(from startTime: TimeInterval, to endTime: TimeInterval, with interval: TimeInterval) -> [DataPoint<T>] {
-        var dataPoints = [DataPoint<T>]()
-        for time in stride(from: startTime, to: endTime, by: interval){
-            dataPoints.append(DataPoint<T>(value: self[time], timeInterval: time))
-        }
-        
-        return dataPoints
-    }
-    
-    /// Generates an array of DataPoints  from a specified time, with samples taken at regular intervals for a total period
-    /// - Parameters:
-    ///   - startTime: The time of the first same
-    ///   - totalTime: The total duration covered by the time series
-    ///   - interval: The period between samples
-    /// - Returns: An array of `DataPoint`s with a sample for each point
-    public func dataPoints(from startTime: TimeInterval, for totalTime: TimeInterval, sampleEvery interval:TimeInterval) -> [DataPoint<T>] {
-        return dataPoints(from: startTime, to: startTime+totalTime, with: interval)
-    }
-    
-    /// Creates a `TimeSeries` directly from the SampleSeries
-    /// - Parameters:
-    ///   - from: The start point of the generated TimeSeries
-    ///   - duration: The `TimeInterval` the time series should cover. If negative the `from` date will be used a to date
-    ///   - interval: The period between data points in the series
-    /// - Returns: The `TimeSeries` object. Note, no further updates will be made if new samples are captured in the original `SampleSeries` as it is a value type
-    public func timeSeries(from:Date, for duration:TimeInterval, every interval:TimeInterval)->TimeSeries<T>{
-        return TimeSeries(from: from, for: duration, every: interval)
-    }
 }
