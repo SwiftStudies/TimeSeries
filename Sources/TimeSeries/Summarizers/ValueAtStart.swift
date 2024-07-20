@@ -6,7 +6,7 @@
 
 import Foundation
 
-/// Summarizes a period by sampling the start  at the start of the period and returning that value
+/// Summarizes a period by sampling at the start of the period and returning that value
 public struct ValueAtStart<S:Sampleable> : Summarizer{
     public typealias DataType = S
     public typealias SampleType = S

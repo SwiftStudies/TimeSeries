@@ -8,6 +8,12 @@ import Testing
 import Foundation
 @testable import TimeSeries
 
+extension TimeInterval {
+    var date : Date {
+        return Date(timeIntervalSinceReferenceDate: self)
+    }
+}
+
 fileprivate var calendar : Calendar {
     var calendar = Calendar(identifier: .gregorian)
     calendar.timeZone = .gmt
