@@ -6,6 +6,7 @@
 
 import Foundation
 
+/// Counts the number of samples in the period
 public struct CountSamples<S:Sampleable> : Summarizer {
     public typealias DataType = Int
     public typealias SampleType = S

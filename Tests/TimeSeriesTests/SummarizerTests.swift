@@ -64,6 +64,39 @@ import Foundation
     #expect(timeSeries.dataPoints[2].value == 0)
 }
 
+@Test func averagesFloatingPointValues() async throws{
+    var timeSeries = TimeSeries<Double,Double>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: AverageFloatingPointValue<Double>())
+
+    try timeSeries.capture(0, at: 0)
+    try timeSeries.capture(2, at: 0.2)
+    try timeSeries.capture(1, at: 1)
+    try timeSeries.capture(4, at: 4)
+    try timeSeries.capture(6, at: 6)
+    try timeSeries.capture(10, at: 10)
+
+    #expect(timeSeries.dataPoints[0].value == 1.35)
+    #expect(timeSeries.dataPoints[1].value == 1.45)
+    #expect(timeSeries.dataPoints[5].value == 5.45)
+}
+
+@Test func averagesIntegerValues() async throws{
+    var timeSeries = TimeSeries<Int,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: AverageIntegerValue<Int>())
+
+    try timeSeries.capture(0, at: 0)
+    try timeSeries.capture(2, at: 0.5)
+    try timeSeries.capture(2, at: 0.6)
+    try timeSeries.capture(2, at: 0.75)
+    try timeSeries.capture(1, at: 0.9)
+    try timeSeries.capture(1, at: 1)
+    try timeSeries.capture(4, at: 4)
+    try timeSeries.capture(6, at: 6)
+    try timeSeries.capture(10, at: 10)
+
+    #expect(timeSeries.dataPoints[0].value == 1)
+    #expect(timeSeries.dataPoints[1].value == 1)
+    #expect(timeSeries.dataPoints[5].value == 5)
+}
+
 @Test func minMaxSum() async throws {
     var timeSeries = TimeSeries<Int,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: MaximumValue<Int>())
 
