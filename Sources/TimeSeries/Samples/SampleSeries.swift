@@ -131,7 +131,54 @@ public struct SampleSeries<T:Sampleable> {
         return interpolator.interpolate(at: fraction, between: a.value, and: b.value)
     }
     
-    /// Indexes the sampel series by a `TimeInterval` (since reference date)
+    /// Returns sample at a precise time, or nil if there is none
+    ///
+    /// - Parameter time: The time being searched for
+    /// - Returns: The `DataPoint` or `nil` if none is found
+    private func dataPoint(atExactly time:TimeInterval)->DataPoint<T>?{
+        for dataPoint in dataPoints {
+            if dataPoint.timeInterval == time {
+                return dataPoint
+            } else if dataPoint.timeInterval > time {
+                return nil
+            }
+        }
+        
+        return nil
+    }
+    
+    /// Provides samples for the supplied time range. It will always include (interpolating if necessary) one at exactly the start and end of the supplied
+    /// `ClosedRange`. If any samples are in between those times they will be included too
+    ///
+    /// - Parameters:
+    /// - time: The  range of times to capture samples between
+    ///
+    /// - Returns: An `Array` of `DataPoint`s containing samples in chronological order
+    public subscript(_ range:ClosedRange<TimeInterval>)->[DataPoint<T>]{
+        var samples = [DataPoint<T>]()
+    
+        if let sampleAtStart = dataPoint(atExactly: range.lowerBound) {
+            samples.append(sampleAtStart)
+        } else {
+            samples.append(DataPoint<T>(value: self[range.lowerBound], timeInterval: range.lowerBound))
+        }
+        
+        for dataPoint in dataPoints {
+            if dataPoint.timeInterval > range.lowerBound && dataPoint.timeInterval < range.upperBound {
+                samples.append(dataPoint)
+            }
+        }
+        
+        if let sampleAtEnd = dataPoint(atExactly: range.upperBound) {
+            samples.append(sampleAtEnd)
+        } else {
+            samples.append(DataPoint<T>(value: self[range.upperBound], timeInterval: range.upperBound))
+        }
+        
+        return samples
+    }
+    
+    /// Indexes the sample series by a `TimeInterval` (since reference date)
     ///
     /// - Parameters:
     /// - time: The `TimeInterval` to capture at

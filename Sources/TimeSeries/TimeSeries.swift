@@ -46,7 +46,13 @@ public struct TimeSeries<SampleType:Sampleable, DataPointType> {
     public private(set) var dataPoints = [DataPoint<DataPointType>]()
     
     var sampleSeries : SampleSeries<SampleType>
-    var summarizer   : any Summarizer<SampleType, DataPointType>
+    
+    /// The way that values for an internval in the `TimeSeries` where the sample type and the time series types are the same, this defaults to the value at the start of the period, but any implementation of `Summarizer` can be used. Chaging the value causes the `dataPoints` to be recalculated
+    public var summarizer   : any Summarizer<SampleType, DataPointType> {
+        didSet {
+            update()
+        }
+    }
     
     /// Reference date for the time series calculation (working forwards or backward depending on if `duration` is positive or negative)
     public var start : Date  {
