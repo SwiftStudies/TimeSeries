@@ -14,7 +14,7 @@ public enum Position {
 /// Summarizes a period by sampling at the end of the period and returning that value (defined as 1 nanosecond before the start of the next period)
 public struct MeasureValue<S:Sampleable> : Summarizer{
     public typealias DataType = S
-    public typealias SampleType = S
+    public typealias SourceType = S
     
     private let position : Position
     
@@ -25,7 +25,7 @@ public struct MeasureValue<S:Sampleable> : Summarizer{
         self.position = position
     }
     
-    public func summarize(series: Series, for period: TimeInterval, startingAt start: TimeInterval) -> DataPoint<S> {
+    public func summarize(series: any Series, for period: TimeInterval, startingAt start: TimeInterval) -> DataPoint<S> {
         let sampleAt : TimeInterval
         switch position {
         case .beginning:
@@ -36,6 +36,6 @@ public struct MeasureValue<S:Sampleable> : Summarizer{
             sampleAt = (start+period)-1.nanoseconds
         }
         
-        return DataPoint<DataType>(value: series[sampleAt], timeInterval: start)
+        return DataPoint<DataType>(value: series[sampleAt][0], timeInterval: start)
     }
 }

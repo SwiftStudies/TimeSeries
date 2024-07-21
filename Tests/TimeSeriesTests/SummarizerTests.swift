@@ -9,7 +9,7 @@ import Foundation
 @testable import TimeSeries
 
 @Test func sampleAtStart() async throws {
-    var timeSeries = TimeSeries<Int,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: MeasureValue<Int>())
+    var timeSeries = TimeSeries<SampleSeries<Int>,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, using: SampleSeries<Int>(), summarizer: MeasureValue<Int>())
 
     for time:TimeInterval in stride(from: 0, through: 10, by: 1){
         try timeSeries.capture(Int(time), at: time)
@@ -22,7 +22,7 @@ import Foundation
 }
 
 @Test func sampleAtEnd() async throws {
-    var timeSeries = TimeSeries<Int,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: MeasureValue<Int>(at:.end))
+    var timeSeries = TimeSeries<SampleSeries<Int>,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, using: SampleSeries<Int>(), summarizer: MeasureValue<Int>(at:.end))
 
     for time:TimeInterval in stride(from: 0, through: 10, by: 1){
         try timeSeries.capture(Int(time), at: time)
@@ -35,7 +35,7 @@ import Foundation
 }
 
 @Test func sampleInMiddle() async throws {
-    var timeSeries = TimeSeries<Double,Double>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: MeasureValue<Double>(at:.middle))
+    var timeSeries = TimeSeries<SampleSeries<Double>,Double>(from: 0.date, for: 10.seconds, every: 1.seconds, using: SampleSeries<Double>(), summarizer: MeasureValue<Double>(at:.middle))
 
     for time:TimeInterval in stride(from: 0, through: 10, by: 1){
         try timeSeries.capture(time, at: time)
@@ -47,7 +47,7 @@ import Foundation
 }
 
 @Test func countSamples() async throws {
-    var timeSeries = TimeSeries<Double,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: CountSamples<Double>())
+    var timeSeries = TimeSeries<SampleSeries<Double>,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, using: SampleSeries<Double>(), summarizer: CountSamples<Double>())
     
     try timeSeries.capture(0, at: 0)
     try timeSeries.capture(1, at: 0.5)
@@ -58,6 +58,8 @@ import Foundation
     try timeSeries.capture(4, at: 4)
     try timeSeries.capture(6, at: 6)
     try timeSeries.capture(10, at: 10)
+    
+    print(timeSeries.dataSeries.dataPoints)
 
     #expect(timeSeries.dataPoints[0].value == 5)
     #expect(timeSeries.dataPoints[1].value == 1)
@@ -65,7 +67,7 @@ import Foundation
 }
 
 @Test func averagesFloatingPointValues() async throws{
-    var timeSeries = TimeSeries<Double,Double>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: AverageFloatingPointValue<Double>())
+    var timeSeries = TimeSeries<SampleSeries<Double>,Double>(from: 0.date, for: 10.seconds, every: 1.seconds, using: SampleSeries<Double>(), summarizer: AverageFloatingPointValue<Double>())
 
     try timeSeries.capture(0, at: 0)
     try timeSeries.capture(2, at: 0.2)
@@ -80,7 +82,7 @@ import Foundation
 }
 
 @Test func averagesIntegerValues() async throws{
-    var timeSeries = TimeSeries<Int,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: AverageIntegerValue<Int>())
+    var timeSeries = TimeSeries<SampleSeries<Int>,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, using: SampleSeries<Int>(), summarizer: AverageIntegerValue<Int>())
 
     try timeSeries.capture(0, at: 0)
     try timeSeries.capture(2, at: 0.5)
@@ -98,7 +100,7 @@ import Foundation
 }
 
 @Test func minMaxSum() async throws {
-    var timeSeries = TimeSeries<Int,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, summarizer: MaximumValue<Int>())
+    var timeSeries = TimeSeries<SampleSeries<Int>,Int>(from: 0.date, for: 10.seconds, every: 1.seconds, using: SampleSeries<Int>(), summarizer: MaximumValue<Int>())
 
     try timeSeries.capture(0, at: 0)
     try timeSeries.capture(1, at: 0.5)

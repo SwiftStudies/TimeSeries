@@ -8,8 +8,8 @@ import Foundation
 @testable import TimeSeries
 
 @Test func defaults() async throws {
-    #expect(SampleSeries<Double>()[10] == 0)
-    #expect(SampleSeries<Double>(20)[10] == 20)
+    #expect(SampleSeries<Double>()[10][0] == 0)
+    #expect(SampleSeries<Double>(20)[10][0] == 20)
 }
 
 @Test func interpolation() async throws {
@@ -23,11 +23,11 @@ import Foundation
         #expect(Bool(false), "Exception thrown: \(error)")
     }
     
-    #expect(timeSeries[-1] == 0)
-    #expect(timeSeries[0] == 0)
-    #expect(timeSeries[5] == 0.5)
-    #expect(timeSeries[10] == 1)
-    #expect(timeSeries[11] == 1)
+    #expect(timeSeries[-1][0] == 0)
+    #expect(timeSeries[0][0] == 0)
+    #expect(timeSeries[5][0] == 0.5)
+    #expect(timeSeries[10][0] == 1)
+    #expect(timeSeries[11][0] == 1)
 }
 
 @Test func interpolatorOverride() async throws {
@@ -36,10 +36,10 @@ import Foundation
     try series.capture(0, at: 0)
     try series.capture(10, at: 10)
     
-    #expect(series[0] == 0)
-    #expect(series[5] == 0)
-    #expect(series[9] == 0)
-    #expect(series[10] == 10)
+    #expect(series[0][0] == 0)
+    #expect(series[5][0] == 0)
+    #expect(series[9][0] == 0)
+    #expect(series[10][0] == 10)
 }
 
 extension Character : Sampleable {
@@ -55,10 +55,10 @@ extension Character : Sampleable {
     try series.capture("a", at: 0)
     try series.capture("b", at: 10)
     
-    #expect(series[0] == "a")
-    #expect(series[5] == "a")
-    #expect(series[9] == "a")
-    #expect(series[10] == "b")
+    #expect(series[0][0] == "a")
+    #expect(series[5][0] == "a")
+    #expect(series[9][0] == "a")
+    #expect(series[10][0] == "b")
 }
 
 @Test func compressionWithBounce() async throws {

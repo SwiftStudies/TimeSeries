@@ -10,7 +10,7 @@ import Foundation
 /// If you need to do the same for `Double` or `Float` use `AverageFloatingPointValue`
 public struct AverageIntegerValue<S:Sampleable> : Summarizer where S : BinaryInteger {
     public typealias DataType = S
-    public typealias SampleType = S
+    public typealias SourceType = S
     
     /// How many sub-samples to capture
     let subSamples : Int
@@ -19,12 +19,12 @@ public struct AverageIntegerValue<S:Sampleable> : Summarizer where S : BinaryInt
         subSamples = subSamplesPerInterval
     }
     
-    public func summarize(series: Series, for period: TimeInterval, startingAt start: TimeInterval) -> DataPoint<S> {
+    public func summarize(series: any Series, for period: TimeInterval, startingAt start: TimeInterval) -> DataPoint<S> {
         var sum   = S.zero
         var count = S.zero
         
         for sampleAt in stride(from: start, to: start+period, by: period/TimeInterval(subSamples)){
-            sum += series[sampleAt]
+            sum += series[sampleAt][0]
             count += 1
         }
         
@@ -36,7 +36,7 @@ public struct AverageIntegerValue<S:Sampleable> : Summarizer where S : BinaryInt
 /// If you need to do the same for Integer types  use `AverageIntPointValue`
 public struct AverageFloatingPointValue<S:Sampleable> : Summarizer where S : FloatingPoint {
     public typealias DataType = S
-    public typealias SampleType = S
+    public typealias SourceType = S
     
     /// How many sub-samples to capture
     let subSamples : Int
@@ -45,12 +45,12 @@ public struct AverageFloatingPointValue<S:Sampleable> : Summarizer where S : Flo
         subSamples = subSamplesPerInterval
     }
     
-    public func summarize(series: Series, for period: TimeInterval, startingAt start: TimeInterval) -> DataPoint<S> {
+    public func summarize(series: any Series, for period: TimeInterval, startingAt start: TimeInterval) -> DataPoint<S> {
         var sum   = S.zero
         var count = S.zero
         
         for sampleAt in stride(from: start, to: start+period, by: period/TimeInterval(subSamples)){
-            sum += series[sampleAt]
+            sum += series[sampleAt][0]
             count += 1
         }
         
