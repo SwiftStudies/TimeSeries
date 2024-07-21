@@ -132,22 +132,7 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
         
         return interpolator.interpolate(at: fraction, between: a.value, and: b.value)
     }
-    
-    /// Returns sample at a precise time, or nil if there is none
-    ///
-    /// - Parameter time: The time being searched for
-    /// - Returns: The `DataPoint` or `nil` if none is found
-    private func dataPoint(atExactly time:TimeInterval)->DataPoint<SampleType>?{
-        for dataPoint in dataPoints {
-            if dataPoint.timeInterval == time {
-                return dataPoint
-            } else if dataPoint.timeInterval > time {
-                return nil
-            }
-        }
-        
-        return nil
-    }
+
     
     /// Provides data points for the supplied time range. If none were taken in this range it will be empty
     ///
