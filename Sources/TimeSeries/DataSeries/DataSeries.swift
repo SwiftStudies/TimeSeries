@@ -30,16 +30,14 @@ public protocol DataSeries<PointType> {
     ///
     /// - Throws: `CaptureError.captureOutOfOrder` if the time is before the most recent capture
     mutating func capture(_ point:PointType, at time: TimeInterval) throws(CaptureError)
-    
-    /// Provides samples for the supplied time range. It will always include (interpolating if necessary) one at exactly the start and end of the supplied
-    /// `ClosedRange`. If any samples are in between those times they will be included too
+
+    /// Provides data points for the supplied time range. If none were taken in this range it will be empty
     ///
     /// - Parameters:
     /// - time: The  range of times to capture samples between
     ///
     /// - Returns: An `Array` of `DataPoint`s containing samples in chronological order
-    subscript(dataPointsFor range:ClosedRange<TimeInterval>)->[DataPoint<PointType>] { get }
-    
+    subscript(dataPointsFrom range:ClosedRange<TimeInterval>)->[DataPoint<PointType>] { get }
     
     /// All points captured at the specified time (since reference date)
     ///
@@ -47,6 +45,7 @@ public protocol DataSeries<PointType> {
     /// - time: The `TimeInterval` to capture at
     ///
     /// - Returns: An array of all points at that time`
-    subscript (time: TimeInterval) -> [PointType] { get }
+    subscript (_ time: TimeInterval) -> [PointType] { get }
 
 }
+

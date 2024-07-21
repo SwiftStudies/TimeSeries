@@ -35,7 +35,7 @@ struct EventSeries<EventType> : DataSeries {
         dataPoints.append(DataPoint<PointType>(value: point, timeInterval: time))
     }
     
-    subscript(dataPointsFor range: ClosedRange<TimeInterval>) -> [DataPoint<EventType>] {
+    subscript(dataPointsFrom range: ClosedRange<TimeInterval>) -> [DataPoint<EventType>] {
         return dataPoints.filter { dataPoint in
             return dataPoint.timeInterval >= range.lowerBound && dataPoint.timeInterval <= range.upperBound
         }

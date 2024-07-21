@@ -18,18 +18,18 @@ fileprivate extension Sequence where Element : Comparable, Element : Sampleable,
 
 public struct MinimumValue<S:Sampleable> : Summarizer where S : Comparable, S : SignedNumeric{
     public typealias DataType = S
-    public typealias SampleType = S
+    public typealias SourceType = S
     
-    public func summarize(series: Series, for period: TimeInterval, startingAt start: TimeInterval) -> DataPoint<S> {
-        return DataPoint<S>(value: series[valuesFor: start...(start+period)-1.nanoseconds].map({$0.value}).minimum, timeInterval: start)
+    public func summarize(series: any Series, for period: TimeInterval, startingAt start: TimeInterval) -> DataPoint<S> {
+        return DataPoint<S>(value: series[samplesFor: start...(start+period)-1.nanoseconds].map({$0.value}).minimum, timeInterval: start)
     }
 }
 
 public struct MaximumValue<S:Sampleable> : Summarizer where S : Comparable, S : SignedNumeric{
     public typealias DataType = S
-    public typealias SampleType = S
+    public typealias SourceType = S
     
-    public func summarize(series: Series, for period: TimeInterval, startingAt start: TimeInterval) -> DataPoint<S> {
-        return DataPoint<S>(value: series[valuesFor: start...(start+period)-1.nanoseconds].map({$0.value}).maximum, timeInterval: start)
+    public func summarize(series: any Series, for period: TimeInterval, startingAt start: TimeInterval) -> DataPoint<S> {
+        return DataPoint<S>(value: series[samplesFor: start...(start+period)-1.nanoseconds].map({$0.value}).maximum, timeInterval: start)
     }
 }
