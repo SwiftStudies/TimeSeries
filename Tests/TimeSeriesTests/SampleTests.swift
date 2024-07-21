@@ -36,8 +36,8 @@ import Foundation
     #expect(timeSeries.sampleTimes.contains(30))
     
     try timeSeries.capture(10, at: 30)
-    #expect(timeSeries[30] == 10)
-    #expect(timeSeries[40] == 10)
+    #expect(timeSeries[30][0] == 10)
+    #expect(timeSeries[40][0] == 10)
 }
 
 @Test func tolerances() async throws {
@@ -65,37 +65,37 @@ import Foundation
     #expect(timeSeries.sampleTimes.contains(30))
     
     try timeSeries.capture(10, at: 30)
-    #expect(timeSeries[30] == 10)
-    #expect(timeSeries[40] == 10)
+    #expect(timeSeries[30][0] == 10)
+    #expect(timeSeries[40][0] == 10)
 }
 
 @Test func creation() async throws {
     var timeSeries = SampleSeries<Double>()
 
     try timeSeries.capture(5, at: 5)
-    #expect(timeSeries[10] == 5)
-    #expect(timeSeries[5] == 5)
-    #expect(timeSeries[0] == 5)
+    #expect(timeSeries[10][0] == 5)
+    #expect(timeSeries[5][0] == 5)
+    #expect(timeSeries[0][0] == 5)
     
     try timeSeries.capture(10, at: 10)
     try timeSeries.capture(15, at: 15)
-    #expect(timeSeries[10] == 10)
+    #expect(timeSeries[10][0] == 10)
 
     timeSeries.clear()
     
     try timeSeries.capture(0, at: 0)
     
-    #expect(throws: SampleError.sampleBeforeEndOfTimeSeries, performing: {
+    #expect(throws: CaptureError.captureOutOfOrder, performing: {
         try timeSeries.capture(10, at: -1)
     })
     
     try timeSeries.capture(1, at: 10)
 
-    #expect(throws: SampleError.sampleBeforeEndOfTimeSeries, performing: {
+    #expect(throws: CaptureError.captureOutOfOrder, performing: {
         try timeSeries.capture(5, at: -1)
     })
     
-    #expect(timeSeries[5] == 0.5)
+    #expect(timeSeries[5][0] == 0.5)
 }
 
 @Test func dataPoints() async throws {
