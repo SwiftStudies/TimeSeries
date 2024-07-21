@@ -116,7 +116,7 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
                 dataPoints.append(newDataPoint)
             }
         } else {
-            if lastValue == point {
+            if lastValue == point && lastButOneValue == point{
                 dataPoints.removeLast()
                 dataPoints.append(newDataPoint)
             } else {

@@ -58,6 +58,8 @@ import Foundation
     try timeSeries.capture(4, at: 4)
     try timeSeries.capture(6, at: 6)
     try timeSeries.capture(10, at: 10)
+    
+    print(timeSeries.dataSeries.dataPoints)
 
     #expect(timeSeries.dataPoints[0].value == 5)
     #expect(timeSeries.dataPoints[1].value == 1)
