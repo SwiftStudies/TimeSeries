@@ -66,14 +66,14 @@ print(temps[Date.now.addingTimeInterval(-2.hours)])
 
 ## Time Series
 
-`TimeSeries` takes a source `DataSeries` and provides a fixed interval set of data points based on it. It does this by using 
+`TimeSeries` is specialized by a type used by its input `DataSeries` and provides a fixed interval set of data points based on it's own `TimeSeriesDataType`. It does this by using 
 a `Summarizer` appropriate to the type of the `DataSeries` (see above). For example, if you were sampling temperatures continuously 
 you may wish to have a time series covering the last 24 hours reporting the average temperature each hour. 
 
 This is very useful for generating charts (for example to use in Swift Charts). 
 
 ```swift
-let last24Hours = TimeSeries<SampleSeries<Double>,Double>(from: Date.now, for: -24.hours, every: 1.hours, using: SampleSeries<Double>())
+let last24Hours = TimeSeries<Double,Double>(from: Date.now, for: -24.hours, every: 1.hours, using: SampleSeries<Double>())
 
 // Print the temperature halfway through
 print(last24Hours[11])
