@@ -1,5 +1,5 @@
 //
-//  Values.swift
+//  Sampleable.swift
 //  TimeSeries
 //
 //
