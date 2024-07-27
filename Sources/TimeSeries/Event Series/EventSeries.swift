@@ -14,6 +14,11 @@ public struct EventSeries<EventType> : DataSeries {
     
     var dataPoints: [DataPoint<EventType>] = []
     
+    /// Create a new instance
+    public init(){
+        
+    }
+    
     public var timeRange: ClosedRange<TimeInterval> {
         guard let first = dataPoints.first, let last = dataPoints.last else {
             return 0...0
