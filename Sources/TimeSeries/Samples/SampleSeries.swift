@@ -19,7 +19,7 @@ import Foundation
 ///```
 
 public struct SampleSeries<SampleType:Sampleable> : DataSeries {
-    public typealias PointType = SampleType
+    public typealias DataPointType = SampleType
 
     let `default` : SampleType
     let tolerance : SampleType?
@@ -191,7 +191,7 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
     
 }
 
-extension DataSeries where PointType: Sampleable {
+extension DataSeries where DataPointType: Sampleable {
     /// Provides samples for the supplied time range. It will always include (interpolating if necessary) one at exactly the start and end of the supplied
     /// `ClosedRange`. If any samples are in between those times they will be included too
     ///
@@ -199,7 +199,7 @@ extension DataSeries where PointType: Sampleable {
     /// - samplesFor: The  range of times to capture samples between
     ///
     /// - Returns: An `Array` of `DataPoint`s containing samples in chronological order
-    public subscript(samplesFor range: ClosedRange<TimeInterval>) -> [DataPoint<PointType>] {
+    public subscript(samplesFor range: ClosedRange<TimeInterval>) -> [DataPoint<DataPointType>] {
         // Get's all of the actual samples in the range
         var samples = self[dataPointsFrom: range]
 
@@ -211,7 +211,7 @@ extension DataSeries where PointType: Sampleable {
         
         if calculateFirst {
             if let calculatedFirst = self[range.lowerBound].first {
-                samples.insert(DataPoint<PointType>(value: calculatedFirst, timeInterval: range.lowerBound), at: 0)
+                samples.insert(DataPoint<DataPointType>(value: calculatedFirst, timeInterval: range.lowerBound), at: 0)
             }
         }
 
@@ -222,7 +222,7 @@ extension DataSeries where PointType: Sampleable {
         }
         if calculateLast {
             if let calculatedLast = self[range.upperBound].first {
-                samples.append(DataPoint<PointType>(value: calculatedLast, timeInterval: range.lowerBound))
+                samples.append(DataPoint<DataPointType>(value: calculatedLast, timeInterval: range.lowerBound))
             }
         }
         
