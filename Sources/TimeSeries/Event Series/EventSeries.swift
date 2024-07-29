@@ -31,6 +31,12 @@ public struct EventSeries<EventType> : DataSeries {
         dataPoints.removeAll()
     }
     
+    mutating public func clear(after time: TimeInterval) {
+        dataPoints = dataPoints.filter { dataPoint in
+            return dataPoint.timeInterval <= time
+        }
+    }
+    
     mutating public func capture(_ point: EventType, at time: TimeInterval) throws(CaptureError) {
         if let last = dataPoints.last {
             guard last.timeInterval <= time else {

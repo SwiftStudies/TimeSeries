@@ -21,6 +21,11 @@ public protocol DataSeries<DataPointType> {
     /// Removes all points
     mutating func clear()
     
+    
+    /// Removes all points after the specified time
+    /// - Parameter time: Interval since reference data after which all data points should be cleared
+    mutating func clear(after time: TimeInterval)
+    
 
     /// Adds a new point, which must always be no sooner than the most recent sample. An error will be thrown if not.
     ///

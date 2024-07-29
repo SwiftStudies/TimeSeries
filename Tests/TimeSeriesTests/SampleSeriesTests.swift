@@ -75,6 +75,21 @@ extension Character : Sampleable {
     #expect(series.dataPoints.count == 7)
 }
 
+@Test func clearing() async throws {
+    var series = SampleSeries<Int>(tolerance: 1)
+    
+    try series.capture(0, at: 0.hours)
+    try series.capture(10, at: 1.hours)
+    try series.capture(20, at: 2.hours)
+    try series.capture(21, at: 5.hours)
+    try series.capture(19, at: 7.hours)
+    try series.capture(21, at: 8.hours)
+    try series.capture(20, at: 9.hours)
+    
+    series.clear(after: 5.hours)
+    
+    #expect(series.dataPoints.count == 4)
+}
 
 @Test func descriptions() async throws {
     var timeSeries = SampleSeries<Int>()

@@ -68,6 +68,12 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
         dataPoints.removeAll()
     }
     
+    mutating public func clear(after time: TimeInterval) {
+        dataPoints = dataPoints.filter { dataPoint in
+            return dataPoint.timeInterval <= time
+        }
+    }
+    
     /// Adds a new sample, which must always be no sooner than the most recent sample. An error will be thrown if not.
     ///
     /// - Parameters:
