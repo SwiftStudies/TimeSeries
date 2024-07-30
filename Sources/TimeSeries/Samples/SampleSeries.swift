@@ -74,6 +74,25 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
         }
     }
     
+    /// Returns the sample at the specified time or the first one before it
+    /// - Parameter onOrBefore: The time you wish to get the sample, or preceeding sample for
+    /// - Returns: The sample from the exact time, or the proceeding sample. If there are none, it will return `nil`
+    public func sample(onOrBefore time: TimeInterval)->DataPoint<DataPointType>?{
+        var lastSample : DataPoint<DataPointType>?
+        
+        for dataPoint in dataPoints {
+            if dataPoint.timeInterval > time {
+                return lastSample
+            } else if dataPoint.timeInterval < time {
+                lastSample = dataPoint
+            } else if dataPoint.timeInterval == time {
+                return dataPoint
+            }
+        }
+        
+        return lastSample
+    }
+    
     /// Adds a new sample, which must always be no sooner than the most recent sample. An error will be thrown if not.
     ///
     /// - Parameters:
