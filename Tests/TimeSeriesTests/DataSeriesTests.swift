@@ -31,6 +31,8 @@ public enum TestEvent {
     #expect(series[dataPointsFrom: 0...3].count == 8)
     #expect(series[dataPointsFrom: 1...2-1.nanoseconds].count == 2)
 
+    #expect(series.oldest!.value == .personDetected)
+    #expect(series.newest!.value == .personDetected)
     
     series.clear(after: 1.5)
     #expect(series.timeRange == 0...1.5)

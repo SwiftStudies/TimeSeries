@@ -51,6 +51,11 @@ public protocol DataSeries<DataPointType> {
     ///
     /// - Returns: An array of all points at that time`
     subscript (_ time: TimeInterval) -> [DataPointType] { get }
+    
+    /// The last captured data-point
+    var newest : DataPoint<DataPointType>? { get }
 
+    /// The first captured data-point
+    var oldest : DataPoint<DataPointType>? { get }
 }
 

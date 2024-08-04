@@ -58,4 +58,11 @@ public struct EventSeries<EventType> : DataSeries {
         }.map({$0.value})
     }
     
+    public var oldest: DataPoint<EventType>? {
+        return dataPoints.first
+    }
+    
+    public var newest: DataPoint<EventType>?{
+        return dataPoints.last
+    }
 }

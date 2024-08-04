@@ -214,6 +214,13 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
         return [self.default]
     }
     
+    public var newest: DataPoint<SampleType>? {
+        return dataPoints.last
+    }
+    
+    public var oldest: DataPoint<SampleType>? {
+        return dataPoints.first
+    }
 }
 
 extension DataSeries where DataPointType: Sampleable {

@@ -73,6 +73,8 @@ extension Character : Sampleable {
     try series.capture(20, at: 9.hours)
     
     #expect(series.dataPoints.count == 7)
+    #expect(series.oldest!.value == 0)
+    #expect(series.newest!.value == 20)
 }
 
 @Test func sampleOnOrBefore() async throws {
