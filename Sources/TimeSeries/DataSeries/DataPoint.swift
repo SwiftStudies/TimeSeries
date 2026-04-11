@@ -9,7 +9,7 @@ import Foundation
 ///
 /// `DataPoint` pairs a generic value with a `TimeInterval` (seconds since the reference date,
 /// matching `Date.timeIntervalSinceReferenceDate`). It is used as both input (captured data) and
-/// output (summarized results) throughout the library.
+/// output (summarized results) throughout the package.
 ///
 /// ```swift
 /// let point = DataPoint(value: 21.5, timeInterval: Date.now.timeIntervalSinceReferenceDate)

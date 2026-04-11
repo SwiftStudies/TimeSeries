@@ -7,7 +7,7 @@ import Foundation
 
 /// Convenience properties for expressing `TimeInterval` values in human-readable time units.
 ///
-/// These allow writing durations as natural literals throughout the library and in client code:
+/// These allow writing durations as natural literals throughout the package and in client code:
 /// ```swift
 /// 3.hours      // 10800.0 (seconds)
 /// 10.minutes   // 600.0

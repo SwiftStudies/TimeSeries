@@ -16,7 +16,7 @@ public enum CaptureError : Error {
 
 /// A protocol for any chronologically ordered collection of time-stamped data points.
 ///
-/// `DataSeries` is the core storage abstraction in this library. Concrete implementations include:
+/// `DataSeries` is the core storage abstraction in this package. Concrete implementations include:
 /// - ``EventSeries`` -- for discrete events (multiple values allowed at the same time)
 /// - ``SampleSeries`` -- for continuously changing values (one value per time, with interpolation)
 ///
