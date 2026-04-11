@@ -5,18 +5,30 @@
 //
 import Foundation
 
-/// A `DataSeries` of samples captured in temporal order (each new point must be captured at or after the time of the previous point).
+/// A ``DataSeries`` for continuously changing values, with automatic interpolation and efficient storage.
 ///
-/// The series will be efficiently captured, that is multiple samples of the same value (wihtin a specifialble tolerance) will result in only as many data ponts as
-/// absolutely necessary to capture. The sample series can be queried at any point in time and value will always be reported even if it must be interpolated. Accessing values is done with a subscript with a specifed time interval (since reference date).
+/// `SampleSeries` stores values in chronological order and can be queried at any point in time.
+/// If the queried time falls between two captured data points, the configured ``Interpolator``
+/// calculates the result. If queried before the first or after the last capture, the nearest
+/// boundary value is returned. If the series is empty, the ``Sampleable/default`` value is returned.
+///
+/// **Efficient storage:** When consecutive captured values are identical (or within the optional
+/// `tolerance`), intermediate data points are collapsed. For example, capturing the value `20.0`
+/// ten times only stores two data points (the first and last occurrence), since the value didn't change.
+///
+/// **Interpolation defaults:** Numeric types (`Int`, `Double`, `Float`) use ``LinearInterpolator``
+/// by default. All other ``Sampleable`` types use ``StepInterpolator``. A custom ``Interpolator``
+/// can be provided via `init(_:tolerance:interpolatedWith:)`.
 ///
 /// ```swift
-///  var samples = SampleSeries<Double>()
+/// var temps = SampleSeries<Double>()
+/// let now = Date.now.timeIntervalSinceReferenceDate
 ///
-///  samples.capture(21.4, at: Date.now.timeIntervalSinceReferenceDate)
+/// try temps.capture(20.0, at: now)
+/// try temps.capture(22.0, at: now + 1.hours)
 ///
-///  print(samples[Date.now.timeIntervalueSinceReferenceDate+3600]) // It will be assumed the value will not change with no future data points, and 21.4 will be printed
-///```
+/// print(temps[now + 30.minutes]) // [21.0] -- linearly interpolated
+/// ```
 
 public struct SampleSeries<SampleType:Sampleable> : DataSeries {
     public typealias DataPointType = SampleType
@@ -27,20 +39,25 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
     
     var dataPoints = [DataPoint<SampleType>]()
     
-    /// Creates a new object
+    /// Creates a new sample series with a specific interpolator.
     /// - Parameters:
-    ///   - defaultValue: The default value to use if no reference points exist, defaults to zero
-    ///   - tolerance: The tolerance that must be met before a new data point is stored in the series, defaults to zero.
+    ///   - defaultValue: The value returned when the series is empty. Defaults to `SampleType.default` (zero for numeric types).
+    ///   - tolerance: Optional tolerance for efficient storage. When set, consecutive values within tolerance are collapsed. Pass `nil` for exact equality comparison.
+    ///   - interpolator: The ``Interpolator`` to use when querying between captured data points.
     public init(_ defaultValue: SampleType = SampleType.default, tolerance: SampleType? = nil, interpolatedWith interpolator: any Interpolator<SampleType>){
         self.default = defaultValue
         self.tolerance = tolerance
         self.interpolator = interpolator
     }
 
-    /// Creates a new object
+    /// Creates a new sample series with an automatically selected interpolator.
+    ///
+    /// Uses ``LinearInterpolator`` for types conforming to ``NumericallyInterpolateable``
+    /// (`Int`, `Double`, `Float`), and ``StepInterpolator`` for all other types.
+    ///
     /// - Parameters:
-    ///   - defaultValue: The default value to use if no reference points exist, defaults to zero
-    ///   - tolerance: The tolerance that must be met before a new data point is stored in the series, defaults to zero.
+    ///   - defaultValue: The value returned when the series is empty. Defaults to `SampleType.default`.
+    ///   - tolerance: Optional tolerance for efficient storage. See ``init(_:tolerance:interpolatedWith:)``.
     public init(_ defaultValue: SampleType = SampleType.default, tolerance: SampleType? = nil)  {
         self.default = defaultValue
         self.tolerance = tolerance
@@ -74,9 +91,13 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
         }
     }
     
-    /// Returns the sample at the specified time or the first one before it
-    /// - Parameter onOrBefore: The time you wish to get the sample, or preceeding sample for
-    /// - Returns: The sample from the exact time, or the proceeding sample. If there are none, it will return `nil`
+    /// Returns the data point at or immediately before the specified time.
+    ///
+    /// Unlike the subscript (which interpolates), this returns the actual stored data point
+    /// without any interpolation.
+    ///
+    /// - Parameter time: The time to query, as seconds since the reference date.
+    /// - Returns: The data point at exactly `time`, or the nearest earlier one. Returns `nil` if no data points exist before the given time.
     public func sample(onOrBefore time: TimeInterval)->DataPoint<DataPointType>?{
         var lastSample : DataPoint<DataPointType>?
         
@@ -177,12 +198,15 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
         return samples
     }
     
-    /// Indexes the sample series by a `TimeInterval` (since reference date)
+    /// Returns the interpolated value at the given time as a single-element array.
     ///
-    /// - Parameters:
-    /// - time: The `TimeInterval` to capture at
+    /// Always returns exactly one value:
+    /// - If the series is empty, returns ``Sampleable/default``.
+    /// - If the time is before the first or after the last capture, returns the nearest boundary value.
+    /// - Otherwise, interpolates between the two surrounding data points using the configured ``Interpolator``.
     ///
-    /// - Returns: The value at that time interpolating or infering as necessary to ensure a value is always created
+    /// - Parameter time: The time to query, as seconds since the reference date.
+    /// - Returns: A single-element array containing the value at that time.
     public subscript (time: TimeInterval) -> [SampleType] {
         if dataPoints.count == 0 {
             return [self.default]
@@ -224,13 +248,15 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
 }
 
 extension DataSeries where DataPointType: Sampleable {
-    /// Provides samples for the supplied time range. It will always include (interpolating if necessary) one at exactly the start and end of the supplied
-    /// `ClosedRange`. If any samples are in between those times they will be included too
+    /// Returns data points for the given time range, always including interpolated values at the range boundaries.
     ///
-    /// - Parameters:
-    /// - samplesFor: The  range of times to capture samples between
+    /// Unlike `subscript(dataPointsFrom:)`, which only returns actually captured data points,
+    /// this subscript guarantees a data point at both the start and end of the range
+    /// (interpolating if necessary). Any captured data points between those boundaries are
+    /// also included. This is useful for summarizers that need complete coverage of a time period.
     ///
-    /// - Returns: An `Array` of `DataPoint`s containing samples in chronological order
+    /// - Parameter range: The closed time range to query.
+    /// - Returns: Data points in chronological order, with interpolated boundary values.
     public subscript(samplesFor range: ClosedRange<TimeInterval>) -> [DataPoint<DataPointType>] {
         // Get's all of the actual samples in the range
         var samples = self[dataPointsFrom: range]

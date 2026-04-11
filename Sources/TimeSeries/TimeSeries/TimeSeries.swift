@@ -23,7 +23,34 @@ public extension TimeSeries where DataSeriesPointType == TimeSeriesPointType, Da
     }
 }
 
-/// The type provides a window with fixed interval samples from the provided samples or SampleSeries.
+/// Generates fixed-interval summary data points from a ``DataSeries``, ideal for charting and analysis.
+///
+/// `TimeSeries` reads from a source ``DataSeries`` and uses a ``Summarizer`` to reduce each
+/// time interval to a single ``DataPoint``. The generic parameters are:
+/// - `DataSeriesPointType`: The type stored in the source ``DataSeries``.
+/// - `TimeSeriesPointType`: The type of the summarized output (may differ, e.g., ``Count`` produces `Int`).
+///
+/// **Value type semantics:** `TimeSeries` is a struct. After creation, mutations to the original
+/// source series do not propagate. Use ``capture(_:at:)`` on the `TimeSeries` itself to add data
+/// and automatically regenerate the summary.
+///
+/// **Negative durations:** When `duration` is negative, the `from` date is treated as the end of
+/// the window, and the series looks backward in time.
+///
+/// ```swift
+/// var samples = SampleSeries<Double>()
+/// // ... capture data ...
+///
+/// // Last 24 hours, hourly averages
+/// let ts = TimeSeries<Double, Double>(
+///     from: Date.now, for: -24.hours, every: 1.hours,
+///     using: samples, summarizer: AverageFloatingPointValue<Double>()
+/// )
+///
+/// for point in ts.dataPoints {
+///     print("\(point.date): \(point.value)")
+/// }
+/// ```
 public struct TimeSeries<DataSeriesPointType, TimeSeriesPointType> {
     public typealias DataSeriesType = DataSeries<DataSeriesPointType>
         
@@ -32,7 +59,8 @@ public struct TimeSeries<DataSeriesPointType, TimeSeriesPointType> {
     
     var dataSeries : any DataSeriesType
     
-    /// The way that values for an internval in the `TimeSeries` where the sample type and the time series types are the same, this defaults to the value at the start of the period, but any implementation of `Summarizer` can be used. Chaging the value causes the `dataPoints` to be recalculated
+    /// The strategy used to reduce each time interval to a single value. Changing this property
+    /// causes ``dataPoints`` to be regenerated immediately.
     public var summarizer   : any Summarizer<DataSeriesPointType, TimeSeriesPointType> {
         didSet {
             update()

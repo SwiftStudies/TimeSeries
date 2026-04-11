@@ -6,7 +6,15 @@
 
 import Foundation
 
-/// Counts the number of samples in the period providing they meet a supplied condition
+/// Counts data points within a time period that satisfy a given condition.
+///
+/// The condition closure is evaluated for each data point in the period.
+/// The output type is always `Int`.
+///
+/// ```swift
+/// // Count how many temperature readings exceeded 30 degrees
+/// let hotCount = CountIf<Double> { $0 > 30.0 }
+/// ```
 public struct CountIf<PointType:Sendable> : Summarizer {
     public typealias DataType = Int
     public typealias SourceType = PointType

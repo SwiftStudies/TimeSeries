@@ -6,12 +6,20 @@
 
 import Foundation
 
-/// Captures where in an an interval
+/// Specifies a position within a time interval for ``MeasureValue`` sampling.
 public enum Position {
-    case beginning, middle, end
+    /// The start of the interval.
+    case beginning
+    /// The midpoint of the interval.
+    case middle
+    /// One nanosecond before the end of the interval (to avoid overlap with the next period).
+    case end
 }
 
-/// Summarizes a period by sampling at the end of the period and returning that value (defined as 1 nanosecond before the start of the next period)
+/// Samples the value at a specific position (beginning, middle, or end) within each time period.
+///
+/// This is the default summarizer when `DataSeriesPointType` and `TimeSeriesPointType` are the
+/// same ``Sampleable`` type. It defaults to sampling at the `.beginning` of each period.
 public struct MeasureValue<S:Sampleable> : Summarizer{
     public typealias DataType = S
     public typealias SourceType = S

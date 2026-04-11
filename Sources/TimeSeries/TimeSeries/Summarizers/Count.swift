@@ -6,7 +6,10 @@
 
 import Foundation
 
-/// Counts the number of samples in the period
+/// Counts the number of captured data points within a time period.
+///
+/// Works with any source type, including both ``EventSeries`` and ``SampleSeries`` data.
+/// The output type is always `Int`.
 public struct Count<PointType> : Summarizer {
     public typealias DataType = Int
     public typealias SourceType = PointType

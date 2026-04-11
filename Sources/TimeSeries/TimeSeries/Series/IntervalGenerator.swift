@@ -6,7 +6,18 @@
 
 import Foundation
 
-/// Standard regular and consistent time intervals
+/// A ``SeriesGenerator`` that produces regular, equally spaced time intervals.
+///
+/// Use this when all periods should have the same length (e.g., hourly intervals over a day).
+///
+/// ```swift
+/// let generator = IntervalGenerator(
+///     start: Date.now.timeIntervalSinceReferenceDate,
+///     totalDuration: 24.hours,
+///     periodLength: 1.hours
+/// )
+/// // Produces 24 one-hour periods
+/// ```
 public struct IntervalGenerator : SeriesGenerator {
     let start : TimeInterval
     let totalDuration : TimeInterval

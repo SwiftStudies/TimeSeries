@@ -3,78 +3,193 @@
 
 # TimeSeries
 
-TimeSeries is a simple Swift package making it very easy to work with sampled real-time data (such as IoT, weather, home, fitness data). 
-Samples are captured and stored efficiently and once captured, can be solely referenced as points in time. 
-The package has complete documentation and very high test coverage. Contributions are very welcome. 
+A Swift package for working with sampled real-time data such as IoT sensors, weather stations, home automation, and fitness trackers. It efficiently captures, stores, and queries time-indexed data with automatic interpolation and summarization.
 
-`TimeSeries` can be built on top of two different `DataSeries` the exhibit different behaviours as they capture new data points. The first
-and simplest is `EventSeries` which is designed to niavely capture data that represents events (which can be any type). The second is `SampleSeries` 
-which is intended to capture changing values over time. It has more sophisticated behavior and is able to interpolate between different captures 
-using customizable methods. 
+## Architecture Overview
 
-## Event Series
+The package is organized into three layers, each building on the previous:
 
-`EventSeries` captures discrete events, such as a security system recording the detection of people, pets, and cars entering its field of view. More
-than one event can be captured at the same time. When used with a `TimeSeries` summarizers include `Count` and `CountIf` at this time. 
+### Layer 1: Data Series (storage)
+
+`DataSeries` is a protocol for storing chronologically ordered data points. Two concrete implementations are provided:
+
+- **`EventSeries<T>`** -- Stores discrete events. Multiple events can occur at the same timestamp. Best for logs, detections, and notifications.
+- **`SampleSeries<T: Sampleable>`** -- Stores continuously changing values. Only one value exists at any point in time, and the series can interpolate between captured values. Best for sensor readings, measurements, and metrics.
+
+Both store `DataPoint<T>` values, which pair a value with a `TimeInterval` (seconds since reference date).
+
+### Layer 2: Interpolation and Sampling
+
+`SampleSeries` uses an `Interpolator` to calculate values between captured data points:
+
+- **`LinearInterpolator`** -- Linearly interpolates between values (default for numeric types: `Double`, `Float`, `Int`)
+- **`RoundingInterpolator`** -- Returns the nearer of the two surrounding values (switches at the midpoint)
+- **`StepInterpolator`** -- Holds the previous value until the next capture (default for non-numeric types)
+
+Custom interpolation can be provided by conforming to the `Interpolator` protocol. Numeric types conform to `NumericallyInterpolateable` to enable linear interpolation.
+
+Types used in `SampleSeries` must conform to `Sampleable`, which requires `Equatable`, a `default` value, and an `inTolerance(_:and:)` method. Default conformances are provided for `Int`, `Double`, and `Float`.
+
+### Layer 3: Time Series (summarization)
+
+`TimeSeries<DataSeriesPointType, TimeSeriesPointType>` generates fixed-interval summary data points from a `DataSeries`. This is the primary type for producing chart-ready data. It uses a `Summarizer` to reduce each time interval to a single value.
+
+Built-in summarizers:
+
+| Summarizer | Input | Output | Description |
+|---|---|---|---|
+| `MeasureValue<S>` | `Sampleable` | Same | Value at beginning, middle, or end of period |
+| `AverageFloatingPointValue<S>` | `FloatingPoint` | Same | Average across sub-samples in period |
+| `AverageIntegerValue<S>` | `BinaryInteger` | Same | Average across sub-samples in period |
+| `Count<T>` | Any | `Int` | Number of data points in period |
+| `CountIf<T>` | `Sendable` | `Int` | Count of data points matching a condition |
+| `MinimumValue<S>` | `Comparable & SignedNumeric` | Same | Minimum value in period |
+| `MaximumValue<S>` | `Comparable & SignedNumeric` | Same | Maximum value in period |
+| `SumSamples<S>` | `SignedNumeric` | Same | Sum of all values in period |
+
+### Series Generators
+
+`SeriesGenerator` produces sequences of non-overlapping time ranges for calendar-aware summarization:
+
+- **`IntervalGenerator`** -- Regular fixed-length intervals
+- **`WeekSeries`** -- 7 daily periods starting from a given date
+- **`MonthSeries`** -- One period per day for the month containing a given date
+- **`Rolling12MonthsSeries`** -- 12 monthly periods starting from a given date
+
+### Time Convenience Extensions
+
+`TimeInterval` extensions provide readable duration literals:
+
+```swift
+3.hours      // 10800.0 seconds
+10.minutes   // 600.0 seconds
+1.days       // 86400.0 seconds
+2.weeks      // 1209600.0 seconds
+```
+
+`Date` extensions provide rounding: `dayRoundedUp`, `hourRoundedUp`, `minuteRoundedUp`, and `mask(excluding:)` for zeroing date components.
+
+## Quick Start
+
+### Event Series
+
+`EventSeries` captures discrete events. Multiple events can occur at the same time.
 
 ```swift
 import TimeSeries
 
-enum SecurityEvents {
+enum SecurityEvent {
     case personDetected, petDetected, vehicleDetected
 }
 
-var drivewayCameraEvents = EventSeries<SecurityEvents>()
+var events = EventSeries<SecurityEvent>()
 
-drivewayCameraEvents.capture(.personDetected, at: Date.now)
-drivewayCameraEvents.capture(.petDetected, at: Date.now) 
+try events.capture(.personDetected, at: Date.now.timeIntervalSinceReferenceDate)
+try events.capture(.petDetected, at: Date.now.timeIntervalSinceReferenceDate)
 ```
 
-## Sample Series
+### Sample Series
 
-`SampleSeries` captures value types and can interpolate between them. For `Double`, `Float`, and `Int` there are a set of standard `Interpolator`s
+`SampleSeries` captures continuously changing values and interpolates between them.
 
- - `RoundingInterpolator` assumes the value changes from the previous to the next once half the time between them has passed
- - `StepInterpolator` assumes that the value changes only at the point the new value is captured (similar to an event)
- - `LinearInterpolator` linearly changes from one value to the next
-
-Unlike events, only the value being sampled can only have one value at a time, so capturing two values at exactly 
-the same time will mean the last call to capture overwrites the previous. Finally when used with `TimeSeries` there 
-are a richer set of `Summarizer`s are availble. 
-
- - `Count` counts the number of samples in a time period
- - `CountIf` counts the numbers of samples in the period that meet a supplied condition
- - `Average` generates the average for the value in the period
- - `MeasureValue` measures the value at the specified point (beginning, middle, or end) in the time period
- - `MinimumValue` returns the minimum value for the time period
- - `MaximumValue` returns the maximum value for the time period
- - `SumSamples` returns the sum of all values in the period 
- 
 ```swift
 import TimeSeries
 
 var temps = SampleSeries<Double>()
 
-temps.capture(currentTemp, at: Date.now)
+let now = Date.now.timeIntervalSinceReferenceDate
+try temps.capture(21.4, at: now)
+try temps.capture(22.1, at: now + 1.hours)
+
+// Query at any time -- the value is interpolated automatically
+print(temps[now + 30.minutes]) // ~21.75 via linear interpolation
 ```
 
-To subsequently retrieve a temperature you no longer reference by sample point but can do so purely indexing by time
-
-```
-print(temps[Date.now.addingTimeInterval(-2.hours)])
-```
-
-## Time Series
-
-`TimeSeries` is specialized by a type used by its input `DataSeries` and provides a fixed interval set of data points based on it's own `TimeSeriesDataType`. It does this by using 
-a `Summarizer` appropriate to the type of the `DataSeries` (see above). For example, if you were sampling temperatures continuously 
-you may wish to have a time series covering the last 24 hours reporting the average temperature each hour. 
-
-This is very useful for generating charts (for example to use in Swift Charts). 
+Efficient storage: if consecutive captured values are the same (or within tolerance), intermediate points are collapsed so only boundary changes are stored.
 
 ```swift
-let last24Hours = TimeSeries<Double,Double>(from: Date.now, for: -24.hours, every: 1.hours, using: SampleSeries<Double>())
-
-// Print the temperature halfway through
-print(last24Hours[11])
+// With tolerance -- values within 0.5 of each other are collapsed
+var smoothTemps = SampleSeries<Double>(tolerance: 0.5)
 ```
+
+### Time Series
+
+`TimeSeries` generates fixed-interval summaries from a data series, ideal for charting.
+
+```swift
+import TimeSeries
+
+var samples = SampleSeries<Double>()
+// ... capture temperature data over time ...
+
+// Summarize the last 24 hours into hourly averages
+let hourlyAvg = TimeSeries<Double, Double>(
+    from: Date.now,
+    for: -24.hours,
+    every: 1.hours,
+    using: samples,
+    summarizer: AverageFloatingPointValue<Double>()
+)
+
+// Access generated data points by index
+for point in hourlyAvg.dataPoints {
+    print("\(point.date): \(point.value)")
+}
+```
+
+When `DataSeriesPointType` and `TimeSeriesPointType` are the same `Sampleable` type, a convenience initializer is available that defaults to `MeasureValue` at the beginning of each period:
+
+```swift
+let hourlyTemps = TimeSeries<Double, Double>(
+    from: Date.now,
+    for: -24.hours,
+    every: 1.hours,
+    using: samples
+)
+```
+
+### Custom Interpolation
+
+Conform to `Interpolator` to define custom interpolation behavior:
+
+```swift
+struct MyInterpolator: Interpolator {
+    func interpolate(at fraction: Double, between start: Double, and end: Double) -> Double {
+        // fraction is 0.0 at start, 1.0 at end
+        return start + (fraction * fraction) * (end - start) // quadratic ease-in
+    }
+}
+
+var series = SampleSeries<Double>(interpolatedWith: MyInterpolator())
+```
+
+### Custom Summarization
+
+Conform to `Summarizer` to define how a time period is reduced to a single value:
+
+```swift
+struct MedianValue: Summarizer {
+    typealias SourceType = Double
+    typealias DataType = Double
+
+    func summarize(series: any Series, for period: TimeInterval, startingAt start: TimeInterval) -> DataPoint<Double> {
+        let points = series[dataPointsFrom: start...(start + period)].map(\.value).sorted()
+        let median = points.isEmpty ? 0.0 : points[points.count / 2]
+        return DataPoint(value: median, timeInterval: start)
+    }
+}
+```
+
+## Key Concepts
+
+- **All times are `TimeInterval`** (seconds since reference date, i.e. `Date.timeIntervalSinceReferenceDate`). Use `DataPoint.date` to convert back to `Date`.
+- **Captures must be chronological.** Calling `capture(_:at:)` with a time before the last capture throws `CaptureError.captureOutOfOrder`.
+- **`SampleSeries` always returns a value** when subscripted, using interpolation or the default value if no data exists.
+- **`EventSeries` returns an empty array** if no events exist at the queried time.
+- **`TimeSeries` is a value type.** After creation, capturing new data on the original `SampleSeries` does not update the `TimeSeries`. Use `TimeSeries.capture(_:at:)` to add data and automatically regenerate summaries.
+- **Negative durations** in `TimeSeries` treat the `from` date as the end, looking backward in time.
+
+## Requirements
+
+- Swift 6.0+
+- macOS 12+, iOS 15+, tvOS 15+, watchOS 10+, Mac Catalyst 15+

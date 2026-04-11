@@ -6,17 +6,29 @@
 
 import Foundation
 
-/// `EventSeries` are useful for capturing a stream of events that you subsequently want to count or process. Unlike a `SampleSeries` they do not have a single value at any point
-/// in time but many events could theoretically occur at the same time
-/// 
+/// A ``DataSeries`` for storing discrete events in chronological order.
+///
+/// Unlike ``SampleSeries``, multiple events can share the same timestamp, and no interpolation
+/// is performed between events. This makes `EventSeries` suitable for logs, detections, or
+/// notifications where each occurrence is independent.
+///
+/// ```swift
+/// var events = EventSeries<String>()
+/// let now = Date.now.timeIntervalSinceReferenceDate
+/// try events.capture("doorbell", at: now)
+/// try events.capture("motion", at: now) // two events at the same time is fine
+/// ```
+///
+/// When used with ``TimeSeries``, the ``Count`` and ``CountIf`` summarizers are typically
+/// the most appropriate choices for summarizing event data into fixed intervals.
 public struct EventSeries<EventType> : DataSeries {
     public typealias DataPointType = EventType
-    
+
     var dataPoints: [DataPoint<EventType>] = []
-    
-    /// Create a new instance
+
+    /// Creates an empty event series.
     public init(){
-        
+
     }
     
     public var timeRange: ClosedRange<TimeInterval> {

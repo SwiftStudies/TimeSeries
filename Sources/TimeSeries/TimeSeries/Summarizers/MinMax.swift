@@ -16,6 +16,7 @@ fileprivate extension Sequence where Element : Comparable, Element : Sampleable,
     }
 }
 
+/// Returns the minimum value within a time period. Requires `Comparable & SignedNumeric`.
 public struct MinimumValue<S:Sampleable> : Summarizer where S : Comparable, S : SignedNumeric{
     public typealias DataType = S
     public typealias SourceType = S
@@ -25,6 +26,7 @@ public struct MinimumValue<S:Sampleable> : Summarizer where S : Comparable, S : 
     }
 }
 
+/// Returns the maximum value within a time period. Requires `Comparable & SignedNumeric`.
 public struct MaximumValue<S:Sampleable> : Summarizer where S : Comparable, S : SignedNumeric{
     public typealias DataType = S
     public typealias SourceType = S

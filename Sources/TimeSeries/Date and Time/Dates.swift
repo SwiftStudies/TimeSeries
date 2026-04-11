@@ -6,9 +6,13 @@
 
 import Foundation
 
+/// Convenience properties for rounding `Date` values up to common calendar boundaries.
+///
+/// These are useful for aligning time series start/end points to clean boundaries.
 public extension Date {
 
-    // The date rounded up (ceiling) to the nearest hour
+    /// Rounds the date up (ceiling) to the start of the next day (midnight).
+    /// If the date is already exactly midnight, it advances to the following midnight.
     var dayRoundedUp: Date {
         let calendar = Calendar.current
         
@@ -25,7 +29,8 @@ public extension Date {
 
     }
     
-    // The date rounded up (ceiling) to the nearest hour
+    /// Rounds the date up (ceiling) to the start of the next hour.
+    /// If the date is already exactly on the hour, it advances to the following hour.
     var hourRoundedUp: Date {
         let calendar = Calendar.current
 
@@ -40,7 +45,8 @@ public extension Date {
         return Date(timeIntervalSinceReferenceDate: round((newTime.timeIntervalSinceReferenceDate-(clipMinutes+clipSeconds+clipNanoseconds))))
     }
 
-    // The date rounded up (ceiling) the nearest minute
+    /// Rounds the date up (ceiling) to the start of the next minute.
+    /// If the date is already exactly on the minute, it advances to the following minute.
     var minuteRoundedUp: Date {
         let calendar = Calendar.current
 

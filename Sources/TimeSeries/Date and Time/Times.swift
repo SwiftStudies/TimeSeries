@@ -5,60 +5,59 @@
 //
 import Foundation
 
+/// Convenience properties for expressing `TimeInterval` values in human-readable time units.
+///
+/// These allow writing durations as natural literals throughout the library and in client code:
+/// ```swift
+/// 3.hours      // 10800.0 (seconds)
+/// 10.minutes   // 600.0
+/// 1.days       // 86400.0
+/// 500.milliseconds // 0.5
+/// ```
+///
+/// The conversion direction depends on the unit:
+/// - `.nanoseconds` and `.milliseconds` **divide** (converting smaller units to seconds).
+/// - `.minutes`, `.hours`, `.days`, `.weeks` **multiply** (converting larger units to seconds).
+/// - `.seconds` is the identity (returns `self`).
 public extension TimeInterval {
-    
-    /// The interval as it's value as a number of nanoseconds
+
+    /// Interprets `self` as a count of nanoseconds and converts to seconds.
+    /// Example: `500_000_000.nanoseconds` equals `0.5` seconds.
     var nanoseconds : Self {
         return self / 1_000_000_000
     }
 
-    /// The interval as it's value as a number of milliseconds
+    /// Interprets `self` as a count of milliseconds and converts to seconds.
+    /// Example: `1500.milliseconds` equals `1.5` seconds.
     var milliseconds : Self {
         return self / 1000
     }
 
-    
-    /// The time interval as it's value as a number of seconds
+    /// Identity -- `self` is already in seconds. Provided for readability.
     var seconds: Self {
         return self
     }
-    
-    /// The time interval as it's value as a number of minutes.
-    ///
-    /// To get a `TimeInterval` of 10 minutes you would use the code below
-    /// ```swift
-    /// 10.minutes // equals 60
-    /// ```
+
+    /// Interprets `self` as a count of minutes and converts to seconds.
+    /// Example: `10.minutes` equals `600.0` seconds.
     var minutes: Self {
         return self * 60
     }
-    
-    /// The time interval as it's value as a number of hours
-    ///
-    /// To get a `TimeInterval` of 3 hours you would use the code below
-    /// ```swift
-    /// 3.hours // equals 10,800
-    /// ```
+
+    /// Interprets `self` as a count of hours and converts to seconds.
+    /// Example: `3.hours` equals `10800.0` seconds.
     var hours: Self {
         return self.minutes * 60
     }
-    
-    /// The time interval as it's value as a number of days.
-    ///
-    /// To get a `TimeInterval` of 1 day  you would use the code below
-    /// ```swift
-    /// 1.days // equals 86,400
-    /// ```
+
+    /// Interprets `self` as a count of days (24 hours each) and converts to seconds.
+    /// Example: `1.days` equals `86400.0` seconds.
     var days: Self {
         return self.hours * 24
     }
-    
-    /// The time interval as it's value as a number of weeks.
-    ///
-    /// To get a `TimeInterval` of 2 weeks you would use the code below
-    /// ```swift
-    /// 2.weeks // equals 1,209,600
-    /// ```
+
+    /// Interprets `self` as a count of weeks (7 days each) and converts to seconds.
+    /// Example: `2.weeks` equals `1209600.0` seconds.
     var weeks:Self {
         return self.days * 7
     }

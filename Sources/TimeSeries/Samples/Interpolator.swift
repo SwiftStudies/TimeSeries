@@ -5,21 +5,31 @@
 //  Created by Nigel Hughes on 7/15/24.
 //
 
-/// A type implementing `Interpolator` can interpolate between any two values of its supported types. There are three default implementations, two of which can be used for any type at all, and the last is focused on numerical types (but will fall back to rounding)
+/// A strategy for computing intermediate values between two data points in a ``SampleSeries``.
+///
+/// When a ``SampleSeries`` is queried at a time between two captured data points, it uses
+/// its `Interpolator` to calculate the result. Three built-in implementations are provided:
+///
+/// - ``StepInterpolator`` -- Holds the previous value until the next capture. Default for non-numeric types.
+/// - ``RoundingInterpolator`` -- Returns the nearer value, switching at the midpoint.
+/// - ``LinearInterpolator`` -- Linearly interpolates between values. Default for `Int`, `Double`, `Float`.
+///
+/// To provide custom interpolation, conform a type to this protocol and pass it to
+/// `SampleSeries.init(_:tolerance:interpolatedWith:)`.
 public protocol Interpolator<T>{
     associatedtype T
     init()
-    
-    /// Produces a new value between start and end based on the supplied fraction
+
+    /// Computes an intermediate value between `start` and `end`.
     /// - Parameters:
-    ///   - fraction: How far from a start to end we would like the value in range 0.0 to 1.0. It is expected that 0.0 = start and 1.0 = end
-    ///   - start: The first value
-    ///   - end: The second value
-    /// - Returns: A new value that is `fraction` between `start` and `end`
+    ///   - fraction: A value from 0.0 (= `start`) to 1.0 (= `end`) indicating position between the two points.
+    ///   - start: The earlier value.
+    ///   - end: The later value.
+    /// - Returns: The interpolated value at the given fraction.
     func interpolate(at fraction:Double, between start:T, and end:T)->T
 }
 
-/// Roundung interpolator assumes that it should return end once it's at or over half-way between the two values
+/// Returns the nearer of two values, switching from `start` to `end` at the midpoint (fraction >= 0.5).
 public struct RoundingInterpolator<T> : Interpolator {
     public init(){
         
@@ -33,7 +43,7 @@ public struct RoundingInterpolator<T> : Interpolator {
     }
 }
 
-/// Step interpolator returns start until fraction == 1.0 and is the default for non-numerical types
+/// Holds the previous value until the exact next capture point (fraction == 1.0). Default for non-numeric types.
 public struct StepInterpolator<T> : Interpolator {
     public init(){
         
@@ -47,7 +57,9 @@ public struct StepInterpolator<T> : Interpolator {
     }
 }
 
-/// Calculates a linear intpolation as long as the `T` is `NumericallyInterpolatable` and uses `RoundingInterpolator` if not
+/// Linearly interpolates between two values when `T` conforms to ``NumericallyInterpolateable``.
+/// Falls back to ``RoundingInterpolator`` for types that do not support numeric interpolation.
+/// This is the default interpolator for `Int`, `Double`, and `Float` in ``SampleSeries``.
 public struct LinearInterpolator<T> : Interpolator {
     let fallback = RoundingInterpolator<T>()
     
@@ -67,14 +79,20 @@ public struct LinearInterpolator<T> : Interpolator {
     }
 }
 
-/// A protocol for types that can support  linear interpolation. The definition is currently pragmatic vs. stylish
+/// A protocol enabling ``LinearInterpolator`` to perform arithmetic interpolation on a type.
+///
+/// Types conforming to this protocol can convert to and from `Double`, which is used as the
+/// intermediate representation during linear interpolation. Default conformances are provided
+/// for `Int`, `Double`, and `Float`.
+///
+/// Conform custom numeric types to this protocol to enable linear interpolation in ``SampleSeries``.
 public protocol NumericallyInterpolateable {
-    /// Creates a new instance of self with a value based on the supplied `Double`
-    /// - Parameter value: The `Double` value to create an equivalent of
-    /// - Returns: An instance of the type
+    /// Creates a new instance from a `Double` value.
+    /// - Parameter value: The `Double` to convert from.
+    /// - Returns: The closest representable value of this type.
     func from(value:Double)->Self
-    
-    /// This `Value` represented as the nearest possible `Double`. Used during interpolation
+
+    /// This value represented as a `Double`, used as the basis for interpolation arithmetic.
     var doubleValue:Double { get }
 }
 

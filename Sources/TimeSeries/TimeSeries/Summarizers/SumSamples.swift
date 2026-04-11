@@ -6,7 +6,8 @@
 
 import Foundation
 
-/// Sums the values of all samples in the period. Result will be 0 if there are no samples in the period
+/// Sums all captured data point values within a time period. Returns zero if no data points exist in the period.
+/// Requires `SignedNumeric`.
 public struct SumSamples<S:Sampleable> : Summarizer  where S:SignedNumeric {
     public typealias DataType = S
     public typealias SourceType = S

@@ -6,8 +6,10 @@
 
 import Foundation
 
-/// Summarizes a period by sampling a specified number of times across the period and averaging them. This supports Integer types.
-/// If you need to do the same for `Double` or `Float` use `AverageFloatingPointValue`
+/// Computes the average value across a time period for integer types (`BinaryInteger`).
+///
+/// Takes `subSamples` evenly spaced readings across the period and returns their mean.
+/// For floating-point types, use ``AverageFloatingPointValue`` instead.
 public struct AverageIntegerValue<S:Sampleable> : Summarizer where S : BinaryInteger {
     public typealias DataType = S
     public typealias SourceType = S
@@ -32,8 +34,10 @@ public struct AverageIntegerValue<S:Sampleable> : Summarizer where S : BinaryInt
     }
 }
 
-/// Summarizes a period by sampling a specified number of times across the period and averaging them. This supports floatingn point types.
-/// If you need to do the same for Integer types  use `AverageIntPointValue`
+/// Computes the average value across a time period for floating-point types (`FloatingPoint`).
+///
+/// Takes `subSamples` evenly spaced readings across the period and returns their mean.
+/// For integer types, use ``AverageIntegerValue`` instead.
 public struct AverageFloatingPointValue<S:Sampleable> : Summarizer where S : FloatingPoint {
     public typealias DataType = S
     public typealias SourceType = S

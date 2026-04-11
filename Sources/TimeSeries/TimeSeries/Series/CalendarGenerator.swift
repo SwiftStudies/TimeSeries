@@ -38,7 +38,9 @@ public extension Date {
 
 }
 
-/// A series that takes any date and generates a series start at midnight that day and extending out for the next 7 days
+/// A ``SeriesGenerator`` that produces 7 daily periods starting from midnight on the given date.
+///
+/// Hours, minutes, and seconds from the input date are stripped. Each period is exactly 24 hours.
 public struct WeekSeries : SeriesGenerator {
     
     let startDate: Date
@@ -63,7 +65,10 @@ public struct WeekSeries : SeriesGenerator {
     
 }
 
-/// A series that takes any date and generates a series start at midnight that day and extending out for the next 7 days
+/// A ``SeriesGenerator`` that produces 12 monthly periods starting from the first day of the month containing the given date.
+///
+/// Each period spans from the first day of a month to one minute before the first day of the next month.
+/// Month lengths vary naturally with the calendar.
 public struct Rolling12MonthsSeries : SeriesGenerator {
     
     let startDate: Date
@@ -92,7 +97,10 @@ public struct Rolling12MonthsSeries : SeriesGenerator {
     }
 }
 
-/// Creates a series with a period for each day of the month of the date supplied
+/// A ``SeriesGenerator`` that produces one 24-hour period per day for the month containing the given date.
+///
+/// The input date is normalized to the first of the month. The number of periods matches
+/// the actual number of days in that month (28-31).
 public struct MonthSeries : SeriesGenerator {
     
     let startDate: Date
