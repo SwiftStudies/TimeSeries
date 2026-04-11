@@ -6,12 +6,15 @@
 import Foundation
 
 public extension TimeSeries where DataSeriesPointType == TimeSeriesPointType, DataSeriesPointType : Sampleable {
-    /// Creates a `TimeSeries` that will update as new samples are captured. Note, no further updates will be made if new samples are captured in the original `SampleSeries` as it is a value type. It will use
-    /// a default summarizer that captures the value at the start of the series
+    /// Convenience initializer that uses ``MeasureValue`` (at `.beginning`) as the default summarizer.
+    ///
+    /// Available when `DataSeriesPointType` and `TimeSeriesPointType` are the same ``Sampleable`` type.
+    ///
     /// - Parameters:
-    ///   - from: The start point of the generated TimeSeries
-    ///   - duration: The `TimeInterval` the time series should cover. If negative the `from` date will be used a to date
-    ///   - interval: The period between data points in the series
+    ///   - from: The reference date for the time series.
+    ///   - duration: The span to cover. If negative, `from` is treated as the end and the series looks backward.
+    ///   - interval: The length of each summarization period, in seconds.
+    ///   - dataSeries: The source ``DataSeries`` to summarize.
     init(from:Date, for duration:TimeInterval, every interval:TimeInterval, using dataSeries:any DataSeriesType){
         self.dataSeries = dataSeries
         timeSeriesStart = from.timeIntervalSinceReferenceDate
@@ -52,9 +55,11 @@ public extension TimeSeries where DataSeriesPointType == TimeSeriesPointType, Da
 /// }
 /// ```
 public struct TimeSeries<DataSeriesPointType, TimeSeriesPointType> {
+    /// A type-erased ``DataSeries`` whose data point type matches `DataSeriesPointType`.
     public typealias DataSeriesType = DataSeries<DataSeriesPointType>
-        
-    /// Datapoints, which will be automatically updated when new samples are captured or the start date is changed
+
+    /// The generated summary data points. Automatically regenerated when ``capture(_:at:)``,
+    /// ``start``, or ``summarizer`` are changed.
     public private(set) var dataPoints = [DataPoint<TimeSeriesPointType>]()
     
     var dataSeries : any DataSeriesType
@@ -67,7 +72,9 @@ public struct TimeSeries<DataSeriesPointType, TimeSeriesPointType> {
         }
     }
     
-    /// Reference date for the time series calculation (working forwards or backward depending on if `duration` is positive or negative)
+    /// The reference date for the time series window. Setting this regenerates ``dataPoints``.
+    ///
+    /// When `duration` is positive, this is the start of the window. When negative, this is the end.
     public var start : Date  {
         get {
             return Date(timeIntervalSinceReferenceDate: timeSeriesStart)
@@ -83,12 +90,17 @@ public struct TimeSeries<DataSeriesPointType, TimeSeriesPointType> {
     let duration : TimeInterval
     let interval : TimeInterval
     
-    /// Creates a `TimeSeries` that will update as new samples are captured. Note, no further updates will be made if new samples are captured in the original `SampleSeries` as it is a value type
+    /// Creates a `TimeSeries` with a specified summarizer.
+    ///
+    /// The source `dataSeries` is copied (value type semantics). Subsequent mutations to the
+    /// original series do not affect this `TimeSeries`. Use ``capture(_:at:)`` to add data.
+    ///
     /// - Parameters:
-    ///   - from: The start point of the generated TimeSeries
-    ///   - duration: The `TimeInterval` the time series should cover. If negative the `from` date will be used a to date
-    ///   - interval: The period between data points in the series
-    ///   - summarizer: The summarizer to use when summarizing data in the source series
+    ///   - from: The reference date for the time series.
+    ///   - duration: The span to cover. If negative, `from` is treated as the end and the series looks backward.
+    ///   - interval: The length of each summarization period, in seconds.
+    ///   - dataSeries: The source ``DataSeries`` to summarize.
+    ///   - summarizer: The ``Summarizer`` strategy to reduce each period to a single value.
     public init(from:Date, for duration:TimeInterval, every interval:TimeInterval, using dataSeries:any DataSeriesType, summarizer: any Summarizer<DataSeriesPointType, TimeSeriesPointType>){
         self.dataSeries = dataSeries
         timeSeriesStart = from.timeIntervalSinceReferenceDate
@@ -99,13 +111,13 @@ public struct TimeSeries<DataSeriesPointType, TimeSeriesPointType> {
         update()
     }
         
-    /// Adds a new sample, which must always be no sooner than the most recent sample. An error will be thrown if not. `dataPoints` will be updated automatically
+    /// Appends a new data point to the underlying series and regenerates ``dataPoints``.
     ///
     /// - Parameters:
-    ///     - value: The new sample
-    ///     - at: The time the sample was taken, defaults to the current time
+    ///     - value: The new value to capture.
+    ///     - at: The time the value was observed, as seconds since the reference date. Defaults to `Date.now`.
     ///
-    /// - Throws: `SampleError.sampleBeforeEndOfTimeSeries` if the sample is before the most recent sample
+    /// - Throws: ``CaptureError/captureOutOfOrder`` if `time` is before the most recent capture.
     mutating public func capture(_ value:DataSeriesPointType, at time: TimeInterval = Date.now.timeIntervalSinceReferenceDate) throws(CaptureError) {
         try dataSeries.capture(value, at: time)
         
@@ -127,13 +139,16 @@ public struct TimeSeries<DataSeriesPointType, TimeSeriesPointType> {
         dataPoints = summarize(from: startAt, to: end, with: interval)
     }
     
-    /// Generates an array of DataPoints between two points in time, with equal amounts of time between each
+    /// Generates summary data points for a custom time range using the current ``summarizer``.
+    ///
+    /// This is the lower-level method used internally by ``update()``. It can also be called
+    /// directly to summarize an arbitrary range without changing the stored ``dataPoints``.
     ///
     /// - Parameters:
-    ///   - startTime: The time of the first sample to take in the series
-    ///   - endTime: The end time of the series
-    ///   - interval: The time between each set of points in the series
-    /// - Returns: An array of `DataPoint`s with a sample for each point
+    ///   - startTime: The start of the range, as seconds since the reference date.
+    ///   - endTime: The end of the range, as seconds since the reference date.
+    ///   - interval: The length of each summarization period, in seconds.
+    /// - Returns: An array of ``DataPoint`` values, one per period, in chronological order.
     public func summarize(from startTime: TimeInterval, to endTime: TimeInterval, with interval: TimeInterval) -> [DataPoint<TimeSeriesPointType>] {
         var dataPoints = [DataPoint<TimeSeriesPointType>]()
         for time in stride(from: startTime, to: endTime, by: interval){
@@ -145,6 +160,7 @@ public struct TimeSeries<DataSeriesPointType, TimeSeriesPointType> {
 }
 
 extension TimeSeries : CustomStringConvertible {
+    /// A comma-separated list of `(timeInterval: value)` pairs for all summary data points.
     public var description: String {
         var output = ""
         

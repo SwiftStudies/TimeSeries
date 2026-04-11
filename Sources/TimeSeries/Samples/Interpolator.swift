@@ -18,6 +18,7 @@
 /// `SampleSeries.init(_:tolerance:interpolatedWith:)`.
 public protocol Interpolator<T>{
     associatedtype T
+    /// Creates a default instance of the interpolator.
     init()
 
     /// Computes an intermediate value between `start` and `end`.
@@ -31,9 +32,11 @@ public protocol Interpolator<T>{
 
 /// Returns the nearer of two values, switching from `start` to `end` at the midpoint (fraction >= 0.5).
 public struct RoundingInterpolator<T> : Interpolator {
+    /// Creates a new rounding interpolator.
     public init(){
-        
+
     }
+    /// Returns `start` when `fraction` < 0.5, otherwise returns `end`.
     public func interpolate(at fraction:Double, between start:T, and end:T)->T{
         if fraction < 0.5 {
             return start
@@ -45,9 +48,11 @@ public struct RoundingInterpolator<T> : Interpolator {
 
 /// Holds the previous value until the exact next capture point (fraction == 1.0). Default for non-numeric types.
 public struct StepInterpolator<T> : Interpolator {
+    /// Creates a new step interpolator.
     public init(){
-        
+
     }
+    /// Returns `start` when `fraction` < 1.0, otherwise returns `end`.
     public func interpolate(at fraction:Double, between start:T, and end:T)->T{
         if fraction < 1.0 {
             return start
@@ -62,11 +67,14 @@ public struct StepInterpolator<T> : Interpolator {
 /// This is the default interpolator for `Int`, `Double`, and `Float` in ``SampleSeries``.
 public struct LinearInterpolator<T> : Interpolator {
     let fallback = RoundingInterpolator<T>()
-    
+
+    /// Creates a new linear interpolator.
     public init(){
-        
+
     }
-    
+
+    /// Computes a linearly interpolated value if `T` conforms to ``NumericallyInterpolateable``,
+    /// otherwise delegates to ``RoundingInterpolator``.
     public func interpolate(at fraction:Double, between start:T, and end:T)->T {
         if let start = start as? NumericallyInterpolateable, let end = end as? NumericallyInterpolateable {
             let interpolatedValue = start.doubleValue + fraction * (end.doubleValue - start.doubleValue)
@@ -96,6 +104,7 @@ public protocol NumericallyInterpolateable {
     var doubleValue:Double { get }
 }
 
+/// Enables ``LinearInterpolator`` support for `Int`. Truncates toward zero when converting from `Double`.
 extension Int : NumericallyInterpolateable {
     public func from(value: Double) -> Int {
         return Int(value)
@@ -106,6 +115,7 @@ extension Int : NumericallyInterpolateable {
     }
 }
 
+/// Enables ``LinearInterpolator`` support for `Double`. No precision loss during conversion.
 extension Double : NumericallyInterpolateable {
     public func from(value: Double) -> Double {
         return value
@@ -116,6 +126,7 @@ extension Double : NumericallyInterpolateable {
     }
 }
 
+/// Enables ``LinearInterpolator`` support for `Float`. May lose precision when converting through `Double`.
 extension Float : NumericallyInterpolateable {
     public func from(value: Double) -> Float {
         return Float(value)

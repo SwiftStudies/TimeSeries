@@ -19,14 +19,18 @@ public struct CountIf<PointType:Sendable> : Summarizer {
     public typealias DataType = Int
     public typealias SourceType = PointType
     
+    /// A closure that evaluates whether a data point should be counted.
     public typealias Condition = @Sendable (PointType) -> Bool
-    
+
     fileprivate let condition : Condition
-    
+
+    /// Creates a new conditional counter with the given predicate.
+    /// - Parameter condition: A closure that returns `true` for data points that should be counted.
     public init(_ condition: @escaping Condition){
         self.condition = condition
     }
-    
+
+    /// Counts data points in the period where ``condition`` returns `true`.
     public func summarize(series: any Series, for period: TimeInterval, startingAt start: TimeInterval) -> DataPoint<Int> {
         return DataPoint<Int>(value: series[dataPointsFrom: start...(start+period)].filter({condition($0.value)}).count, timeInterval: start)
     }

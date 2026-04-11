@@ -32,29 +32,37 @@ public protocol Sampleable : Equatable {
     func inTolerance(_ one: Self, and other: Self) -> Bool
 }
 
+/// Default ``Sampleable`` implementation for `Equatable` types: tolerance check uses exact equality.
 public extension Sampleable where Self : Equatable{
-    
+
+    /// Returns `true` if `one == other`. This is the default for non-numeric `Equatable` types.
     func inTolerance(_ one: Self, and other: Self) -> Bool {
         return one == other
     }
 }
 
+/// Default ``Sampleable`` implementation for numeric types (`SignedNumeric & Comparable`).
 public extension Sampleable where Self : SignedNumeric, Self : Comparable {
+    /// Returns `.zero` as the default value for numeric types.
     static var `default` : Self {
         return Self.zero
     }
 
+    /// Returns `true` if the absolute difference between `one` and `other` is <= `self`.
     func inTolerance(_ one: Self, and other: Self) -> Bool {
         return abs(one - other) <= self
     }
 }
 
+/// Enables `Int` for use in ``SampleSeries`` and ``TimeSeries``. Default value is `0`.
 extension Int : Sampleable {
 }
 
+/// Enables `Double` for use in ``SampleSeries`` and ``TimeSeries``. Default value is `0.0`.
 extension Double : Sampleable {
 }
 
+/// Enables `Float` for use in ``SampleSeries`` and ``TimeSeries``. Default value is `0.0`.
 extension Float : Sampleable {
 }
 

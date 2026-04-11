@@ -14,6 +14,7 @@ public struct Count<PointType> : Summarizer {
     public typealias DataType = Int
     public typealias SourceType = PointType
     
+    /// Returns the count of data points captured within the period.
     public func summarize(series: any Series, for period: TimeInterval, startingAt start: TimeInterval) -> DataPoint<Int> {
         return DataPoint<Int>(value: series[dataPointsFrom: start...(start+period)].count, timeInterval: start)
     }

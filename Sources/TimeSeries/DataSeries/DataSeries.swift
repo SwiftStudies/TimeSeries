@@ -26,6 +26,7 @@ public enum CaptureError : Error {
 /// Data must be captured in chronological order. Attempting to capture a point before the
 /// most recent one throws ``CaptureError/captureOutOfOrder``.
 public protocol DataSeries<DataPointType> {
+    /// The type of value stored in each ``DataPoint`` of this series.
     associatedtype DataPointType
 
     /// The closed range from the earliest to the latest captured time.

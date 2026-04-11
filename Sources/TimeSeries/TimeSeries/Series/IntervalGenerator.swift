@@ -34,9 +34,10 @@ public struct IntervalGenerator : SeriesGenerator {
         self.periodLength = periodLength
     }
     
+    /// Generates equally spaced periods of length ``periodLength`` covering ``totalDuration``.
     public func generate() -> any Sequence<ClosedRange<TimeInterval>> {
         var result : [ClosedRange<TimeInterval>] = []
-        
+
         for time in stride(from: start, to: start+totalDuration, by: periodLength){
             result.append(time...(time+periodLength))
         }

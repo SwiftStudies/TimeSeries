@@ -33,6 +33,7 @@ public struct MeasureValue<S:Sampleable> : Summarizer{
         self.position = position
     }
     
+    /// Samples the source series at the configured ``Position`` within the period.
     public func summarize(series: any Series, for period: TimeInterval, startingAt start: TimeInterval) -> DataPoint<S> {
         let sampleAt : TimeInterval
         switch position {

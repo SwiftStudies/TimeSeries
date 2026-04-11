@@ -73,6 +73,7 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
         return dataPoints.map { $0.timeInterval }
     }
     
+    /// The closed range from the earliest to the latest captured time. Returns `0...0` if empty.
     public var timeRange: ClosedRange<TimeInterval>{
         if let first = sampleTimes.first, let last = sampleTimes.last {
             return first...last
@@ -80,17 +81,18 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
         return 0...0
     }
     
-    /// Removes all samples
+    /// Removes all captured samples from the series.
     public mutating func clear() {
         dataPoints.removeAll()
     }
     
+    /// Removes all samples captured after the specified time. Samples at exactly `time` are kept.
     mutating public func clear(after time: TimeInterval) {
         dataPoints = dataPoints.filter { dataPoint in
             return dataPoint.timeInterval <= time
         }
     }
-    
+
     /// Returns the data point at or immediately before the specified time.
     ///
     /// Unlike the subscript (which interpolates), this returns the actual stored data point
@@ -114,13 +116,17 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
         return lastSample
     }
     
-    /// Adds a new sample, which must always be no sooner than the most recent sample. An error will be thrown if not.
+    /// Appends a new sample to the series.
+    ///
+    /// The time must be >= the most recent capture. If a sample is captured at the exact same time
+    /// as the last entry, it overwrites that entry. Consecutive identical values (or values within
+    /// tolerance) are automatically collapsed for efficient storage.
     ///
     /// - Parameters:
-    ///     - value: The new sample
-    ///     - at: The time the sample was taken, defaults to the current time
+    ///     - point: The new sample value.
+    ///     - at: The time the sample was taken, as seconds since the reference date. Defaults to `Date.now`.
     ///
-    /// - Throws: `SampleError.sampleBeforeEndOfTimeSeries` if the sample is before the most recent sample
+    /// - Throws: ``CaptureError/captureOutOfOrder`` if `time` is before the most recent capture.
     public mutating func capture(_ point: SampleType, at time: TimeInterval = Date.now.timeIntervalSinceReferenceDate) throws(CaptureError) {
         let newDataPoint = DataPoint(value: point, timeInterval: time)
                 
@@ -180,12 +186,10 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
     }
 
     
-    /// Provides data points for the supplied time range. If none were taken in this range it will be empty
+    /// Returns actually captured data points within the given closed time range (no interpolation).
     ///
-    /// - Parameters:
-    /// - time: The  range of times to capture samples between
-    ///
-    /// - Returns: An `Array` of `DataPoint`s containing samples in chronological order
+    /// - Parameter range: The closed range of `TimeInterval` values to query.
+    /// - Returns: An array of ``DataPoint`` values in chronological order, or empty if none were captured in the range.
     public subscript(dataPointsFrom range:ClosedRange<TimeInterval>)->[DataPoint<SampleType>] {
         var samples = [DataPoint<SampleType>]()
             
@@ -238,10 +242,12 @@ public struct SampleSeries<SampleType:Sampleable> : DataSeries {
         return [self.default]
     }
     
+    /// The most recently captured data point, or `nil` if the series is empty.
     public var newest: DataPoint<SampleType>? {
         return dataPoints.last
     }
-    
+
+    /// The earliest captured data point, or `nil` if the series is empty.
     public var oldest: DataPoint<SampleType>? {
         return dataPoints.first
     }
@@ -289,6 +295,7 @@ extension DataSeries where DataPointType: Sampleable {
 }
 
 extension SampleSeries : CustomStringConvertible {
+    /// A comma-separated list of `(timeInterval: value)` pairs for all stored data points.
     public var description: String {
         var output = ""
         

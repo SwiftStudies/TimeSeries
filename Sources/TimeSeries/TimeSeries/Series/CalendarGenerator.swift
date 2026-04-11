@@ -7,9 +7,13 @@
 import Foundation
 
 public extension Date {
-    /// Enables you to mask out some components of a date (year, month, day, hour, minute, second, or nanosecond).
-    /// - Parameter mask: A set of the components to mask out constrained by the set above
-    /// - Returns: A new date
+    /// Zeros out specified date components, useful for normalizing dates to calendar boundaries.
+    ///
+    /// For `.month` and `.day`, the value is reset to 1 (not 0). For time components (`.hour`,
+    /// `.minute`, `.second`, `.nanosecond`), the value is reset to 0. For `.year`, it is set to `nil`.
+    ///
+    /// - Parameter mask: The set of `Calendar.Component` values to reset.
+    /// - Returns: A new `Date` with the specified components zeroed out.
     func mask(excluding mask:Set<Calendar.Component>)->Date{
         var components = Calendar.current.dateComponents([.year,.month, .day,.hour, .minute, .second, .nanosecond], from: self)
         
@@ -51,10 +55,11 @@ public struct WeekSeries : SeriesGenerator {
         self.startDate = date.mask(excluding: [.hour, .minute, .second, .nanosecond])
     }
     
+    /// Generates 7 consecutive 24-hour periods starting from midnight on ``startDate``.
     public func generate() -> any Sequence<ClosedRange<TimeInterval>> {
         let start = startDate.timeIntervalSinceReferenceDate
         var result : [ClosedRange<TimeInterval>] = []
-        
+
         for time in stride(from: start, to: start+7.days, by: 1.days){
             result.append(time...(time+1.days))
         }
@@ -79,9 +84,10 @@ public struct Rolling12MonthsSeries : SeriesGenerator {
         self.startDate = date.mask(excluding: [.day,.hour, .minute, .second, .nanosecond])
     }
     
+    /// Generates 12 monthly periods starting from the first of the month of ``startDate``.
     public func generate() -> any Sequence<ClosedRange<TimeInterval>> {
         var result : [ClosedRange<TimeInterval>] = []
-        
+
         for monthOffset in 0..<12 {
             var components = Calendar.current.dateComponents([.year,.month, .day], from: startDate)
             components.month! += monthOffset
@@ -111,9 +117,10 @@ public struct MonthSeries : SeriesGenerator {
         self.startDate = date.mask(excluding: [.day,.hour, .minute, .second, .nanosecond])
     }
     
+    /// Generates one 24-hour period per day for the month of ``startDate``.
     public func generate() -> any Sequence<ClosedRange<TimeInterval>> {
         var result : [ClosedRange<TimeInterval>] = []
-        
+
         for dayOffset in 0..<31 {
             var components = Calendar.current.dateComponents([.year,.month, .day], from: startDate)
             let month = components.month!
